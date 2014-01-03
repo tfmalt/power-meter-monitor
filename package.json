@@ -4,6 +4,10 @@
   "version": "0.1.4",
   "author": "Thomas Malt",
   "description": "Reading and logging electrical power meter by connecting to an arduino board",
+  "repository": {
+    "url": "https://github.com/tfmalt/power-meter-monitor.git"
+  },
+  "main": "lib/meter.js",
   "private": true,
   "dependencies": {
     "serialport": ">= 1.2.2",
