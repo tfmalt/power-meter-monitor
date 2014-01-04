@@ -3,7 +3,7 @@
  * storing it in a redis database for later consumption. 
  * 
  */
-var meter  = require('./lib/meter'),
+var meter  = require('./lib/main').meter,
     logger = require('winston'),
     domain = require('domain').create();
 
