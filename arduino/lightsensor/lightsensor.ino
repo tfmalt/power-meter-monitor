@@ -20,8 +20,10 @@
 
 Timer t;
 
-const int sensorPin = 3;
-const int ledPin    = 12;
+const int sensorPin = 2;
+const int ledStart = 4;
+const int ledEnd   = 13;
+int ledPin = 3;
 
 
 unsigned long time, start, pulseStart, duration, counter, loopCounter;
@@ -34,8 +36,14 @@ void setup()
     loopCounter  = 0;
     light        = LOW;
     inPulse      = false;
-  
-    pinMode(ledPin, OUTPUT);
+    ledPin       = ledStart;
+ 
+    int i;
+    for (i = ledStart; i <= ledEnd; i++)
+    {
+        pinMode(i, OUTPUT);
+    }
+
     int tickEvent = t.every(1000, sendUpdate, (void*)2);
 
     Serial.begin(115200);
@@ -55,19 +63,40 @@ void loop()
 
     if (light == HIGH) {
         if (inPulse == false) {
-            pulseStart = time;
-            inPulse = true;
-            digitalWrite(ledPin, HIGH);
+            startPulse();
         }
     } else {
         if (inPulse == true) {
-            inPulse = false;
-            counter++;
-            digitalWrite(ledPin, LOW);
+            endPulse();
+            setLedPin();
         }
     }
 
     t.update();
+}
+
+void startPulse() 
+{
+    time       = micros();
+    pulseStart = time;
+    inPulse    = true;
+    digitalWrite(ledPin, HIGH);
+}
+
+void endPulse() 
+{
+    inPulse = false;
+    counter++;
+    digitalWrite(ledPin, LOW);
+}
+
+void setLedPin() 
+{
+    if (ledPin <= ledEnd) {
+        ledPin++;
+    } else {
+        ledPin = ledStart;
+    }
 }
 
 void sendUpdate(void* context) 
@@ -75,6 +104,8 @@ void sendUpdate(void* context)
     Serial.print("{");
     Serial.print("\"pulseCount\": \"");
     Serial.print(counter);
+    Serial.print("\", \"ledPin\": \"");
+    Serial.print(ledPin);
     Serial.println("\"}");
 
     counter     = 0;
