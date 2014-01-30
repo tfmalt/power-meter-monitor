@@ -21,27 +21,25 @@
 Timer t;
 
 const int sensorPin = 2;
-const int ledStart = 4;
-const int ledEnd   = 13;
-int ledPin = 3;
+int ledPin, ledMax; 
+int ledPins[] = {4,5,6,7,8,9,10,11,12,13};
 
-
-unsigned long time, start, pulseStart, duration, counter, loopCounter;
+unsigned long counter, kwhCounter;
 boolean light, inPulse;
   
 void setup()
 {
-    start        = micros();
-    counter      = 0;
-    loopCounter  = 0;
-    light        = LOW;
-    inPulse      = false;
-    ledPin       = ledStart;
- 
+    counter    = 0;
+    kwhCounter = 0;
+    light      = LOW;
+    inPulse    = false;
+    ledPin     = 0;
+    ledMax     = 10;
+
     int i;
-    for (i = ledStart; i <= ledEnd; i++)
+    for (i = ledPin; i < ledMax; i++)
     {
-        pinMode(i, OUTPUT);
+        pinMode(ledPins[i], OUTPUT);
     }
 
     int tickEvent = t.every(1000, sendUpdate, (void*)2);
@@ -56,10 +54,7 @@ void setup()
 
 void loop()
 {
-    time  = micros();
     light = digitalRead(sensorPin);
-    
-    loopCounter++;    
 
     if (light == HIGH) {
         if (inPulse == false) {
@@ -68,7 +63,7 @@ void loop()
     } else {
         if (inPulse == true) {
             endPulse();
-            setLedPin();
+            setLeds();
         }
     }
 
@@ -77,27 +72,39 @@ void loop()
 
 void startPulse() 
 {
-    time       = micros();
-    pulseStart = time;
     inPulse    = true;
-    digitalWrite(ledPin, HIGH);
 }
 
 void endPulse() 
 {
     inPulse = false;
     counter++;
-    digitalWrite(ledPin, LOW);
+    kwhCounter++;
 }
 
-void setLedPin() 
+void setLeds() 
 {
-    if (ledPin <= ledEnd) {
-        ledPin++;
-    } else {
-        ledPin = ledStart;
+    int binCounter = map(kwhCounter, 0, 10000, 0, 1023);
+    int pin = 0;
+
+    while (binCounter > 0) 
+    {
+        digitalWrite(ledPins[pin], (binCounter%2) ? HIGH : LOW);
+        binCounter = binCounter/2;
+        pin++;
+    }
+
+    while (pin < ledMax) {
+        digitalWrite(ledPins[pin], LOW);
+        pin++;
+    }
+
+    if (kwhCounter > 10000)
+    {
+        kwhCounter = 0;
     }
 }
+
 
 void sendUpdate(void* context) 
 {
@@ -109,8 +116,6 @@ void sendUpdate(void* context)
     Serial.println("\"}");
 
     counter     = 0;
-    loopCounter = 0;
-    start       = time;
 }
 
 
