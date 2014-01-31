@@ -13,7 +13,7 @@
  * end to pick up.
  * 
  * @author Thomas Malt <thomas@malt.no>
- * @copyright 2013 (c) Thomas Malt <thomas@malt.no>
+ * @copyright 2013-2014 (c) Thomas Malt <thomas@malt.no>
  * 
  */
 #include "Timer.h"
@@ -22,7 +22,7 @@ Timer t;
 
 const int sensorPin = 2;
 int ledPin, ledMax; 
-int ledPins[] = {4,5,6,7,8,9,10,11,12,13};
+int ledPins[] = {4,5,6,7,8,9,10,11,};
 
 unsigned long counter, kwhCounter;
 boolean light, inPulse;
@@ -34,7 +34,7 @@ void setup()
     light      = LOW;
     inPulse    = false;
     ledPin     = 0;
-    ledMax     = 10;
+    ledMax     = 8;
 
     int i;
     for (i = ledPin; i < ledMax; i++)
@@ -63,7 +63,6 @@ void loop()
     } else {
         if (inPulse == true) {
             endPulse();
-            setLeds();
         }
     }
 
@@ -82,9 +81,9 @@ void endPulse()
     kwhCounter++;
 }
 
-void setLeds() 
+void updateLeds() 
 {
-    int binCounter = map(kwhCounter, 0, 10000, 0, 1023);
+    int binCounter = map(kwhCounter, 0, 10000, 0, 255);
     int pin = 0;
 
     while (binCounter > 0) 
@@ -94,15 +93,13 @@ void setLeds()
         pin++;
     }
 
-    while (pin < ledMax) {
+    while (pin < ledMax) 
+    {
         digitalWrite(ledPins[pin], LOW);
         pin++;
     }
 
-    if (kwhCounter > 10000)
-    {
-        kwhCounter = 0;
-    }
+    if (kwhCounter > 10000) kwhCounter = 0;
 }
 
 
@@ -111,18 +108,19 @@ void sendUpdate(void* context)
     Serial.print("{");
     Serial.print("\"pulseCount\": \"");
     Serial.print(counter);
-    Serial.print("\", \"ledPin\": \"");
-    Serial.print(ledPin);
+    // Serial.print("\", \"ledPin\": \"");
+    // Serial.print(ledPin);
     Serial.println("\"}");
 
-    counter     = 0;
+    counter = 0;
+    updateLeds();
 }
 
 
 /*
  * MIT LICENSE
  * 
- * Copyright (C) 2013 Thomas Malt <thomas@malt.no>
+ * Copyright (C) 2013-2014 Thomas Malt <thomas@malt.no>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining 
  * a copy of this software and associated documentation files (the 
