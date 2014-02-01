@@ -22,9 +22,9 @@ Timer t;
 
 const int sensorPin = 2;
 int ledPin, ledMax; 
-int ledPins[] = {4,5,6,7,8,9,10,11,};
+int ledPins[] = {4,5,6,7,8,9,10,11};
 
-unsigned long counter, kwhCounter;
+unsigned long counter, kwhCounter, time;
 boolean light, inPulse;
   
 void setup()
@@ -71,7 +71,7 @@ void loop()
 
 void startPulse() 
 {
-    inPulse    = true;
+    inPulse = true;
 }
 
 void endPulse() 
@@ -98,21 +98,25 @@ void updateLeds()
         digitalWrite(ledPins[pin], LOW);
         pin++;
     }
-
-    if (kwhCounter > 10000) kwhCounter = 0;
 }
 
 
 void sendUpdate(void* context) 
 {
+    time = millis();
+
     Serial.print("{");
     Serial.print("\"pulseCount\": \"");
     Serial.print(counter);
-    // Serial.print("\", \"ledPin\": \"");
-    // Serial.print(ledPin);
+    Serial.print("\", \"kwhCount\": \"");
+    Serial.print(kwhCounter);
+    Serial.print("\", \"timestamp\": \"");
+    Serial.print(time);
     Serial.println("\"}");
 
     counter = 0;
+    if (kwhCounter > 10000) kwhCounter = 0;
+
     updateLeds();
 }
 
