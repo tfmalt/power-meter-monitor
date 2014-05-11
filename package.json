@@ -1,7 +1,7 @@
 {
   "name": "power-meter-monitor",
   "main": "./lib/meter.js",
-  "version": "0.3.1",
+  "version": "0.3.4",
   "author": "Thomas Malt",
   "description": "Reading and logging electrical power meter by connecting to an arduino board",
   "repository": {
