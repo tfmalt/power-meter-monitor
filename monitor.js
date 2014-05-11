@@ -3,7 +3,8 @@
  * storing it in a redis database for later consumption. 
  * 
  */
-var meter  = require('./lib/main').meter,
+var config = require('./config-private'),
+    meter  = require('./lib/main').meter,
     logger = require('winston'),
     domain = require('domain').create();
 
@@ -28,7 +29,7 @@ domain.run(function () {
         json: false
     });
 
-    meter.startMonitor();
+    meter.startMonitor(config.redis);
 
     logger.info("Power meter monitoring started in master script");
 });
