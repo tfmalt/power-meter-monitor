@@ -20,21 +20,29 @@
 
 Timer t;
 
-const int sensorPin = 2;
+const int sensorPin = 3;
+const int blinkPin  = 13;
+
 int ledPin, ledMax; 
 int ledPins[] = {4,5,6,7,8,9,10,11};
 
-unsigned long counter, kwhCounter, time;
+unsigned long counter, kwhCounter, time, pulseTime, waitTime;
+unsigned long pulseLength, waitLength;
+
 boolean light, inPulse;
+
+String highValues = "[";
   
 void setup()
 {
-    counter    = 0;
-    kwhCounter = 0;
-    light      = LOW;
-    inPulse    = false;
-    ledPin     = 0;
-    ledMax     = 8;
+    counter     = 0;
+    kwhCounter  = 0;
+    light       = LOW;
+    inPulse     = false;
+    ledPin      = 0;
+    ledMax      = 8;
+
+    pinMode(blinkPin, OUTPUT);
 
     int i;
     for (i = ledPin; i < ledMax; i++)
@@ -56,29 +64,40 @@ void loop()
 {
     light = digitalRead(sensorPin);
 
-    if (light == HIGH) {
-        if (inPulse == false) {
-            startPulse();
-        }
-    } else {
-        if (inPulse == true) {
-            endPulse();
-        }
-    }
+    if (light == HIGH && inPulse == false) startPulse();
+    if (light == LOW  && inPulse == true)  endPulse();
 
     t.update();
 }
 
 void startPulse() 
 {
-    inPulse = true;
+    pulseTime = micros();
+    inPulse   = true;
+
+    waitLength = micros() - waitTime;
+    highValues += "\"off:";
+    highValues += waitLength;
+    highValues += "\",";
+    digitalWrite(blinkPin, HIGH);
 }
 
 void endPulse() 
 {
-    inPulse = false;
+    digitalWrite(blinkPin, LOW);
+    waitTime = micros();
+   
+    pulseLength = micros() - pulseTime;
+
+    highValues += "\"on:";
+    highValues += pulseLength;
+    highValues += "\",";
+
+    inPulse     = false;
+
     counter++;
     kwhCounter++;
+
 }
 
 void updateLeds() 
@@ -105,6 +124,8 @@ void sendUpdate(void* context)
 {
     time = millis();
 
+    highValues += "0]";
+
     Serial.print("{");
     Serial.print("\"pulseCount\": \"");
     Serial.print(counter);
@@ -112,9 +133,13 @@ void sendUpdate(void* context)
     Serial.print(kwhCounter);
     Serial.print("\", \"timestamp\": \"");
     Serial.print(time);
-    Serial.println("\"}");
+    Serial.print("\", \"pulsetimes\": ");
+    Serial.print(highValues);
+    Serial.println("}");
 
     counter = 0;
+    highValues = "[";
+
     if (kwhCounter > 10000) kwhCounter = 0;
 
     updateLeds();
