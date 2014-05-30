@@ -24,8 +24,8 @@ domain.run(function () {
         colorize:  true, 
         timestamp: true,
         filename: "/var/log/power-meter/monitor.log",
-        maxsize: 10485760,
-        maxFiles: 10,
+        maxsize: 100000000,
+        maxFiles: 2,
         json: false
     });
 
@@ -33,3 +33,4 @@ domain.run(function () {
 
     logger.info("Power meter monitoring started in master script");
 });
+
