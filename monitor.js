@@ -3,7 +3,7 @@
  * storing it in a redis database for later consumption. 
  * 
  */
-var config = require('./config-private'),
+var config = require('./config'),
     meter  = require('./lib/main').meter,
     logger = require('winston'),
     domain = require('domain').create();
@@ -26,15 +26,17 @@ domain.run(function () {
     logger.add(logger.transports.File, {
         colorize:  true,
         timestamp: true,
-        filename: "/var/log/power-meter/monitor.log",
-        maxsize: 100000000,
-        maxFiles: 2,
+        filename: config.logfile,
         json: false
     });
 
-    console.log("power-meter-monitor version 0.4.6");
+    console.log("power-meter-monitor version: " + config.version);
+    console.log("Logging to: " + config.logfile);
     meter.startMonitor(config.redis);
 
-    logger.info("Power meter monitoring started in master script");
+    logger.info(
+        "Power meter monitoring v%s started in master script",
+        config.version
+    );
 });
 
