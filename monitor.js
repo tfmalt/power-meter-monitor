@@ -22,16 +22,24 @@ process.on('SIGINT', function () {
 
 domain.run(function () {
     "use strict";
-    logger.remove(logger.transports.Console);
-    logger.add(logger.transports.File, {
-        colorize:  true,
-        timestamp: true,
-        filename: config.logfile,
-        json: false
-    });
-
     console.log("power-meter-monitor version: " + config.version);
+
+    logger.remove(logger.transports.Console);
+    if (process.env.POWER_ENV === "development") {
     console.log("Logging to: " + config.logfile);
+        logger.add(logger.transports.Console, {
+            colorize: true,
+            timestmap: true
+        });
+    } else {
+        logger.add(logger.transports.File, {
+            colorize:  true,
+            timestamp: true,
+            filename: config.logfile,
+            json: false
+        });
+    }
+
     meter.startMonitor(config.redis);
 
     logger.info(
