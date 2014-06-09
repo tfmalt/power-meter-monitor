@@ -3,10 +3,11 @@
  * storing it in a redis database for later consumption. 
  * 
  */
-var config = require('./config'),
-    meter  = require('./lib/main').meter,
-    logger = require('winston'),
-    domain = require('domain').create();
+var config     = require('./config'),
+    meter      = require('./lib/main').meter,
+    logger     = require('winston'),
+    VitalSigns = require('vitalsigns'),
+    domain     = require('domain').create();
 
 domain.on("error", function (err) {
     "use strict";
@@ -40,6 +41,31 @@ domain.run(function () {
             json: false
         });
     }
+
+    logger.info("Setting up health check with VitalSigns.");
+
+    var vitals = new VitalSigns({autoCheck: 10000});
+
+    vitals.monitor('cpu');
+    vitals.monitor('mem', {units: 'MB'});
+    vitals.monitor('tick');
+
+    vitals.on('healthChange', function (healthy, report, failed) {
+        logger.warn(
+            "Health Change: server is: %s\nReport: %s\nFailed: %s",
+            (healthy ? 'healthy' : 'unhealthy'),
+            report,
+            failed
+        );
+    });
+
+    vitals.on('healthCheck', function (healthy, report, failed) {
+        var type = healthy ? 'info' : 'warn';
+        logger.log(type, "Health Check");
+        logger.log(type, '  healthy:', healthy);
+        logger.log(type, '  report:', JSON.stringify(report));
+        logger.log(type, '  failed:', failed);
+    });
 
     meter.startMonitor(config.redis);
 
