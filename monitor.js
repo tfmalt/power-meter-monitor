@@ -22,16 +22,17 @@ process.on('SIGINT', function () {
 
 domain.run(function () {
     "use strict";
-    console.log("power-meter-monitor version: " + config.version);
+    console.log("Starting power-meter-monitor version " + config.version);
 
     logger.remove(logger.transports.Console);
     if (process.env.POWER_ENV === "development") {
-    console.log("Logging to: " + config.logfile);
+        console.log("Logging to: Console.\n");
         logger.add(logger.transports.Console, {
             colorize: true,
             timestmap: true
         });
     } else {
+        console.log("Logging to: ", config.logfile, "\n");
         logger.add(logger.transports.File, {
             colorize:  true,
             timestamp: true,
