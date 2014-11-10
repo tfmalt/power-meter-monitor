@@ -1,23 +1,21 @@
 {
   "name": "power-meter-monitor",
-  "main": "./lib/meter.js",
+  "main": "lib/main.js",
   "version": "0.5.10",
   "author": "Thomas Malt",
   "description": "Reading and logging electrical power meter by connecting to an arduino board",
   "repository": {
     "url": "http://github.com/tfmalt/power-meter-monitor"
   },
-  "main": "lib/main.js",
   "private": true,
   "dependencies": {
-    "serialport": ">= 1.2.2",
-    "redis": ">= 0.9.0",
-    "winston": ">= 0.7.2",
-    "async":   ">= 0.0.0",
-    "q": ">= 1.0.0",
-    "underscore": ">= 1.4.4",
-    "vitalsigns": ">= 0.2.2",
-    "forever": ">= 0.10.0"
+    "forever": "^0.13.0",
+    "q": "^1.1.1",
+    "redis": "^0.12.1",
+    "serialport": "^1.4.6",
+    "underscore": "^1.7.0",
+    "vitalsigns": "^0.4.3",
+    "winston": "^0.8.3"
   },
   "devDependencies": {
     "mocha": ">= 1.8.1",
