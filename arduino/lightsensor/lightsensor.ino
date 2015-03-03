@@ -13,7 +13,7 @@
  * end to pick up.
  * 
  * @author Thomas Malt <thomas@malt.no>
- * @copyright 2013-2014 (c) Thomas Malt <thomas@malt.no>
+ * @copyright 2013-2015 (c) Thomas Malt <thomas@malt.no>
  * 
  */
 #include "Timer.h"
@@ -32,7 +32,10 @@ unsigned long pulseLength, waitLength;
 boolean light, inPulse;
 
 String highValues = "[";
-  
+ 
+/**
+ * The default setup 
+ */ 
 void setup()
 {
     counter     = 0;
@@ -72,59 +75,30 @@ void loop()
 
 void startPulse() 
 {
-    pulseTime = micros();
+    // pulseTime = micros();
     inPulse   = true;
 
-    waitLength = micros() - waitTime;
-    highValues += "\"off:";
-    highValues += waitLength;
-    highValues += "\",";
+    // waitLength = micros() - waitTime;
+    // highValues += "\"off:";
+    // highValues += waitLength;
+    // highValues += "\",";
     digitalWrite(blinkPin, HIGH);
 }
 
 void endPulse() 
 {
     digitalWrite(blinkPin, LOW);
-    waitTime = micros();
-   
-    pulseLength = micros() - pulseTime;
-
-    highValues += "\"on:";
-    highValues += pulseLength;
-    highValues += "\",";
 
     inPulse     = false;
 
     counter++;
     kwhCounter++;
-
-}
-
-void updateLeds() 
-{
-    int binCounter = map(kwhCounter, 0, 10000, 0, 255);
-    int pin = 0;
-
-    while (binCounter > 0) 
-    {
-        digitalWrite(ledPins[pin], (binCounter%2) ? HIGH : LOW);
-        binCounter = binCounter/2;
-        pin++;
-    }
-
-    while (pin < ledMax) 
-    {
-        digitalWrite(ledPins[pin], LOW);
-        pin++;
-    }
 }
 
 
 void sendUpdate(void* context) 
 {
     time = millis();
-
-    highValues += "0]";
 
     Serial.print("{");
     Serial.print("\"pulseCount\": \"");
@@ -133,23 +107,19 @@ void sendUpdate(void* context)
     Serial.print(kwhCounter);
     Serial.print("\", \"timestamp\": \"");
     Serial.print(time);
-    Serial.print("\", \"pulsetimes\": ");
-    Serial.print(highValues);
     Serial.println("}");
 
     counter = 0;
-    highValues = "[";
-
-    if (kwhCounter > 10000) kwhCounter = 0;
-
-    updateLeds();
+    if (kwhCounter > 10000) {
+        kwhCounter = 0;
+    }
 }
 
 
 /*
  * MIT LICENSE
  * 
- * Copyright (C) 2013-2014 Thomas Malt <thomas@malt.no>
+ * Copyright (C) 2013-2015 Thomas Malt <thomas@malt.no>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining 
  * a copy of this software and associated documentation files (the 
