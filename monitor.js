@@ -1,7 +1,11 @@
 /**
- * Script that fetches info from my power meter using ardunio and 
- * storing it in a redis database for later consumption. 
- * 
+ *
+ * Startup script for running power-meter-monitor which  fetches info
+ * from my power meter using ardunio and storing it in a redis database
+ * for later consumption.
+ *
+ * @author Thomas Malt <thomas@malt.no>
+ * @copyright (C) 2013-2015 Thomas Malt
  */
 var config     = require('./config'),
     meter      = require('./lib/main').meter,
