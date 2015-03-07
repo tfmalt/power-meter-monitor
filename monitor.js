@@ -67,7 +67,7 @@ domain.run(function () {
         logger.log(type, '  failed:', failed);
     });
 
-    meter.startMonitor(config.redis);
+    meter.startMonitor(config);
 
     logger.info(
         "Power meter monitoring v%s started in master script",
