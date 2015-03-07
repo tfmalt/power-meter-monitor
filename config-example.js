@@ -1,7 +1,12 @@
 var pj = require('./package.json');
 
 exports.version = pj.version;
-exports.logfile = "/var/log/power-meter/monitor.log";
+
+if (process.env.POWER_ENV === "development") {
+    exports.logfile = "monitor.log";
+} else {
+    exports.logfile = "/var/log/power-meter/monitor.log";
+}
 
 exports.redis = {
     host: "localhost",
@@ -9,4 +14,8 @@ exports.redis = {
     options: {
         auth_pass: null
     }
+};
+
+exports.serial =  {
+    dev: "/tmp/meteroutput"
 };
