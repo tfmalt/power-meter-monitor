@@ -4,8 +4,6 @@
  * @type {exports.expect}
  */
 
-/* jslint expr: true */
-/* jslint es5: true */
 
 var expect     = require('chai').expect,
     Meter      = require('../lib/main').Meter,
@@ -25,11 +23,8 @@ describe('Power Meter Monitor', function () {
         });
 
         it('should have correct initial values', function () {
-            //noinspection BadExpressionStatementJS
             expect(m.port).to.be.null;
-            //noinspection BadExpressionStatementJS
             expect(m.db).to.be.null;
-            //noinspection BadExpressionStatementJS
             expect(m.hasBegun).to.be.false;
         });
 
