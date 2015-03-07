@@ -1,1 +1,1 @@
-config-private.js
+config-example.js
