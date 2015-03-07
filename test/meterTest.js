@@ -152,6 +152,57 @@ describe('Power Meter Monitor', function () {
             })
         });
 
-        describe('average')
+        describe('average', function() {
+            var meter = new Meter();
+
+            it('should return correct average', function() {
+                expect(meter.average([1,5,8])).to.equal(5);
+            });
+
+            it('should throw error when array is empty', function() {
+                expect(meter.average.bind(meter, [])).to.throw(Error);
+            });
+
+            it('should throw error with invalid data', function() {
+                expect(meter.average).to.throw(Error);
+            })
+        });
+
+        describe('median', function() {
+            var meter = new Meter();
+
+            it('should return correctly from an array', function() {
+                expect(meter.median([1,2,3,5,8])).to.equal(3);
+                expect(meter.median([1,2,3,5])).to.equal(3);
+            });
+        });
+
+        describe('splitPulsetimes', function() {
+            var meter = new Meter();
+            it('should throw error with no pulsetimes', function() {
+                expect(meter.splitPulsetimes).to.throw(TypeError);
+            });
+
+            it('should return array when pulsetimes is empty', function() {
+                expect(meter.splitPulsetimes([])).to.deep.equal({
+                    "on": [],
+                    "off": []
+                });
+            });
+
+            it('should throw error when passed illegal data', function () {
+                expect(meter.splitPulsetimes.bind(meter, ["foo", "bar"])).to.throw(TypeError);
+                expect(meter.splitPulsetimes.bind(meter, {"foo": 1, "bar": 2})).to.throw(TypeError);
+                expect(meter.splitPulsetimes.bind(meter, "foobar")).to.throw(TypeError, /must be an array/);
+            });
+
+            it('should return correct when passed correct data', function() {
+                expect(meter.splitPulsetimes(["on:100", "off:200", "on:99"])).to.deep.equal({
+                    "on": [100, 99],
+                    "off": [200]
+                });
+                expect(meter.splitPulsetimes([0])).to.deep.equal({"on":[],"off":[]});
+            })
+        })
     });
 });
