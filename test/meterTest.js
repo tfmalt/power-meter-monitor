@@ -5,12 +5,16 @@
  */
 
 
-var expect     = require('chai').expect,
-    Meter      = require('../lib/main').Meter,
-    serialport = require('serialport'),
-    logger     = require('winston'),
-    redis      = require('fakeredis'),
-    config     = require('../config-test');
+var chai        = require('chai'),
+    chaipromise = require('chai-as-promised'),
+    expect      = chai.expect,
+    Meter       = require('../lib/main').Meter,
+    serialport  = require('serialport'),
+    logger      = require('winston'),
+    redis       = require('fakeredis'),
+    config      = require('../config-test');
+
+chai.use(chaipromise);
 
 logger.remove(logger.transports.Console);
 
@@ -70,20 +74,16 @@ describe('Power Meter Monitor', function () {
         describe('getSerialPort', function () {
             var meter = new Meter();
             it('should have a valid SerialPort', function () {
-                expect(meter.getSerialPort({
-                    "serialport": serialport,
-                    "config": config
-                })).to.be.instanceOf(serialport.SerialPort);
+                expect(
+                    meter.getSerialPort(serialport, config.serial)
+                ).to.be.instanceOf(serialport.SerialPort);
             });
 
             it('should throw error with invalid config', function () {
                 expect(meter.getSerialPort.bind(meter, {})).to.throw(Error);
-                expect(meter.getSerialPort.bind(meter, {
-                    "serialport": serialport,
-                    "config": {
-                        "serial": {}
-                    }
-                })).to.throw(Error, /config.dev was not a string/);
+                expect(
+                    meter.getSerialPort.bind(meter, serialport, {"serial": {}})
+                ).to.throw(Error, /config.dev was not a string/);
             });
 
         });
@@ -202,7 +202,75 @@ describe('Power Meter Monitor', function () {
                     "off": [200]
                 });
                 expect(meter.splitPulsetimes([0])).to.deep.equal({"on":[],"off":[]});
+            });
+        });
+
+        describe('storeSecondInHour', function() {
+            var meter  = new Meter();
+            meter.db = meter.getRedisClient(redis, config.redis);
+
+            it('should have a valid redis client', function() {
+                expect(meter.db).to.respondTo('rpush');
+            });
+
+            it('should work as promised', function() {
+                return expect(meter.storeSecondInHour({"pulsetimes": ["on:100", "off:200"]})).to.eventually.have.all.keys([
+                    'listType',
+                    'pulseCount',
+                    'pulsetimes',
+                    'timestamp'
+                ]);
+            });
+        });
+
+        describe('addTotalDelta', function () {
+            var meter = new Meter();
+            meter.db = meter.getRedisClient(redis, config.redis);
+
+            it('should work as promised', function() {
+                return expect(meter.addTotalDelta({"pulseCount": 10})).to.eventually.equal(0.001);
+            });
+        });
+
+        describe('storeMinuteInDay', function() {
+            var meter = new Meter();
+            meter.db = meter.getRedisClient(redis, config.redis);
+
+            it('should work as promised', function() {
+                return expect(meter.storeMinuteInDay()).to.eventually.have.all.keys([
+                    'listType',
+                    'timestamp',
+                    'timestr',
+                    'sum',
+                    'total',
+                    'values',
+                    'max',
+                    'min',
+                    'average'
+                ]);
+            });
+        });
+
+        describe('storeHour', function() {
+            var meter = new Meter();
+            meter.db = meter.getRedisClient(redis, config.redis);
+
+            it('should return data as promised', function() {
+                return expect(meter.storeHour()).to.eventually.have.all.keys([
+                    "datestr", "kwh", "timestamp", "total"
+                ]);
+            });
+        });
+
+        describe('storeDay', function() {
+            var meter = new Meter();
+            meter.db = meter.getRedisClient(redis, config.redis);
+
+            it('should return data as promised', function() {
+                return expect(meter.storeDay()).to.eventually.have.all.keys([
+                    "timestamp", "timestr", "kwh", "total"
+                ]);
             })
-        })
+        });
     });
 });
