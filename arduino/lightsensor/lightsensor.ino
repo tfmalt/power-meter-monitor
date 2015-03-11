@@ -13,7 +13,7 @@
  * end to pick up.
  * 
  * @author Thomas Malt <thomas@malt.no>
- * @copyright 2013-2014 (c) Thomas Malt <thomas@malt.no>
+ * @copyright 2013-2015 (c) Thomas Malt <thomas@malt.no>
  * 
  */
 #include "Timer.h"
