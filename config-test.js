@@ -1,3 +1,9 @@
+/**
+ * A configuration file for running tests.
+ *
+ * @namespace process.env.POWER_ENV
+ * @type {exports}
+ */
 var pj = require('./package.json');
 
 exports.version = pj.version;
