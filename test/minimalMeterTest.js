@@ -10,10 +10,13 @@ var chai        = require('chai'),
     expect      = chai.expect,
     Meter       = require('../lib/main').MinimalMeter,
     serialport  = require('serialport'),
+    logger      = require('winston'),
     fakeredis   = require('fakeredis'),
     config      = require('../config-test');
 
 chai.use(chaipromise);
+
+logger.remove(logger.transports.Console);
 
 describe('Power Meter Minimal Monitor', function () {
     describe('meter', function () {
