@@ -168,22 +168,6 @@ describe('Power Meter Monitor', function () {
             });
         });
 
-        describe('average', function() {
-            var meter = new Meter();
-
-            it('should return correct average', function() {
-                expect(meter.average([1,5,8])).to.equal(5);
-            });
-
-            it('should throw error when array is empty', function() {
-                expect(meter.average.bind(meter, [])).to.throw(Error);
-            });
-
-            it('should throw error with invalid data', function() {
-                expect(meter.average).to.throw(Error);
-            })
-        });
-
         describe('median', function() {
             var meter = new Meter();
 
@@ -232,9 +216,7 @@ describe('Power Meter Monitor', function () {
 
             it('should work as promised', function() {
                 return expect(meter.storeSecondInHour({"pulsetimes": ["on:100", "off:200"]})).to.eventually.have.all.keys([
-                    'listType',
                     'pulseCount',
-                    'pulsetimes',
                     'timestamp'
                 ]);
             });

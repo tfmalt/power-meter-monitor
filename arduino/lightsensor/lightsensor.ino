@@ -23,15 +23,8 @@ Timer t;
 const int sensorPin = 3;
 const int blinkPin  = 13;
 
-int ledPin, ledMax; 
-int ledPins[] = {4,5,6,7,8,9,10,11};
-
-unsigned long counter, kwhCounter, time, pulseTime, waitTime;
-unsigned long pulseLength, waitLength;
-
+unsigned long counter, kwhCounter, time;
 boolean light, inPulse;
-
-String highValues = "[";
  
 /**
  * The default setup 
@@ -42,16 +35,8 @@ void setup()
     kwhCounter  = 0;
     light       = LOW;
     inPulse     = false;
-    ledPin      = 0;
-    ledMax      = 8;
 
     pinMode(blinkPin, OUTPUT);
-
-    int i;
-    for (i = ledPin; i < ledMax; i++)
-    {
-        pinMode(ledPins[i], OUTPUT);
-    }
 
     int tickEvent = t.every(1000, sendUpdate, (void*)2);
 
@@ -75,21 +60,14 @@ void loop()
 
 void startPulse() 
 {
-    // pulseTime = micros();
-    inPulse   = true;
-
-    // waitLength = micros() - waitTime;
-    // highValues += "\"off:";
-    // highValues += waitLength;
-    // highValues += "\",";
+    inPulse = true;
     digitalWrite(blinkPin, HIGH);
 }
 
 void endPulse() 
 {
     digitalWrite(blinkPin, LOW);
-
-    inPulse     = false;
+    inPulse = false;
 
     counter++;
     kwhCounter++;
@@ -114,7 +92,6 @@ void sendUpdate(void* context)
         kwhCounter = 0;
     }
 }
-
 
 /*
  * MIT LICENSE
