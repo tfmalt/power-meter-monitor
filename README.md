@@ -1,3 +1,4 @@
+[![npm version](https://badge.fury.io/js/power-meter-monitor.svg)](http://badge.fury.io/js/power-meter-monitor)
 [![Code Climate](https://codeclimate.com/github/tfmalt/power-meter-monitor/badges/gpa.svg)](https://codeclimate.com/github/tfmalt/power-meter-monitor)
 
 # Power Meter Monitor
