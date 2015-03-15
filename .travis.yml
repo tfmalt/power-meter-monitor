@@ -3,4 +3,9 @@ node_js:
     - "0.12"
     - "0.11"
     - "0.10"
+addons:
+    code_climate:
+        repo_token: 220d6c383f577ea1ee6045741a550915ca4fe6a018d66d6429f462f09f5f71d0
+after_script:
+    - cat coverage/lcov.info | codeclimeate
 
