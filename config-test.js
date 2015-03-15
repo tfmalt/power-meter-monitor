@@ -23,5 +23,5 @@ exports.redis = {
 };
 
 exports.serial =  {
-    dev: "/tmp/meteroutput"
+    dev: "/dev/tty.usbmodem1d11431"
 };
