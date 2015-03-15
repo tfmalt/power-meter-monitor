@@ -85,7 +85,7 @@ void sendUpdate(void* context)
     Serial.print(kwhCounter);
     Serial.print("\", \"timestamp\": \"");
     Serial.print(time);
-    Serial.println("}");
+    Serial.println("\"}");
 
     counter = 0;
     if (kwhCounter > 10000) {
