@@ -27,7 +27,6 @@ describe('Power Meter Monitor', function () {
         });
 
         it('should have correct initial values', function () {
-            expect(m.port).to.be.null;
             expect(m.db).to.be.null;
             expect(m.hasBegun).to.be.false;
         });
@@ -40,50 +39,23 @@ describe('Power Meter Monitor', function () {
                 expect(meter.startMonitor).to.throw(Error);
             });
 
-            it('should throw error when serialport not object', function () {
-                expect(meter.startMonitor.bind(meter, {
-                    "redis": fakeredis,
-                    "config": config
-                })).to.throw(Error);
-            });
-
             it('should throw error when redis not object', function () {
                 expect(meter.startMonitor.bind(meter, {
-                    "serialport": serialport,
                     "config": config
                 })).to.throw(Error);
             });
 
             it('should throw error when config not object', function () {
                 expect(meter.startMonitor.bind(meter, {
-                    "serialport": serialport,
                     "redis": fakeredis
                 })).to.throw(Error);
             });
 
             it('should return undefined when everything is ok', function () {
                 expect(meter.startMonitor({
-                    "serialport": serialport,
                     "redis": fakeredis,
                     "config": config
                 })).to.be.undefined;
-            });
-
-        });
-
-        describe('getSerialPort', function () {
-            var meter = new Meter();
-            it('should have a valid SerialPort', function () {
-                expect(
-                    meter.getSerialPort(serialport, config.serial)
-                ).to.be.instanceOf(serialport.SerialPort);
-            });
-
-            it('should throw error with invalid config', function () {
-                expect(meter.getSerialPort.bind(meter, {})).to.throw(Error);
-                expect(
-                    meter.getSerialPort.bind(meter, serialport, {"serial": {}})
-                ).to.throw(Error, /config.dev was not a string/);
             });
 
         });
@@ -95,11 +67,11 @@ describe('Power Meter Monitor', function () {
             });
 
             it('should return undefined when not beginning and reads noise', function () {
-                expect(meter.handleData("Hello there line noise")).to.be.undefined;
+                expect(meter.handleData("Hello there line noise", meter)).to.be.undefined;
             });
 
             it('should behave correctly when receiving BEGIN json', function () {
-                expect(meter.handleData('{"BEGIN": 1}')).to.be.undefined;
+                expect(meter.handleData('{"BEGIN": 1}', meter)).to.be.undefined;
             });
 
             it('should have begun - hasBegun should be true', function() {
@@ -107,8 +79,8 @@ describe('Power Meter Monitor', function () {
             });
 
             it('should behave correctly when hasBegun is true', function () {
-                expect(meter.handleData("hello there")).to.be.true;
-                expect(meter.handleData('{"foo": 1, "bar": 2}')).to.be.true;
+                expect(meter.handleData("hello there", meter)).to.be.true;
+                expect(meter.handleData('{"foo": 1, "bar": 2}', meter)).to.be.true;
             });
 
         });
@@ -158,52 +130,11 @@ describe('Power Meter Monitor', function () {
                 expect(meter.handlePulseCount({
                     "pulseCount": 4,
                     "kwhCount": 5239,
-                    "timestamp": 436783000,
-                    "pulsetimes": [
-                        "off:206256", "on:8408", "off:202452",
-                        "on:8308", "off:206684", "on:8464",
-                        "off:206368", "on:8468", 0
-                    ]
+                    "timestamp": 436783000
                 })).to.be.undefined;
             });
         });
 
-        describe('median', function() {
-            var meter = new Meter();
-
-            it('should return correctly from an array', function() {
-                expect(meter.median([1,2,3,5,8])).to.equal(3);
-                expect(meter.median([1,2,3,5])).to.equal(3);
-            });
-        });
-
-        describe('splitPulsetimes', function() {
-            var meter = new Meter();
-            it('should throw error with no pulsetimes', function() {
-                expect(meter.splitPulsetimes).to.throw(TypeError);
-            });
-
-            it('should return array when pulsetimes is empty', function() {
-                expect(meter.splitPulsetimes([])).to.deep.equal({
-                    "on": [],
-                    "off": []
-                });
-            });
-
-            it('should throw error when passed illegal data', function () {
-                expect(meter.splitPulsetimes.bind(meter, ["foo", "bar"])).to.throw(TypeError);
-                expect(meter.splitPulsetimes.bind(meter, {"foo": 1, "bar": 2})).to.throw(TypeError);
-                expect(meter.splitPulsetimes.bind(meter, "foobar")).to.throw(TypeError, /must be an array/);
-            });
-
-            it('should return correct when passed correct data', function() {
-                expect(meter.splitPulsetimes(["on:100", "off:200", "on:99"])).to.deep.equal({
-                    "on": [100, 99],
-                    "off": [200]
-                });
-                expect(meter.splitPulsetimes([0])).to.deep.equal({"on":[],"off":[]});
-            });
-        });
 
         describe('storeSecondInHour', function() {
             var meter = new Meter();
@@ -215,9 +146,11 @@ describe('Power Meter Monitor', function () {
             });
 
             it('should work as promised', function() {
-                return expect(meter.storeSecondInHour({"pulsetimes": ["on:100", "off:200"]})).to.eventually.have.all.keys([
+                return expect(meter.storeSecondInHour({
+                    "pulseCount": 3, "timestamp": "2000"
+                })).to.eventually.have.all.keys([
                     'pulseCount',
-                    'timestamp'
+                    'timestamp', 'listType'
                 ]);
             });
         });
@@ -307,17 +240,6 @@ describe('Power Meter Monitor', function () {
                 return expect(meter.storeDay()).to.eventually.have.all.keys([
                     "timestamp", "timestr", "kwh", "total"
                 ]);
-            });
-        });
-
-        describe('getAveragePulse', function() {
-            var meter = new Meter();
-
-            it('should calculate the correct average', function() {
-                expect(meter.getAveragePulse({
-                    "on": [100,200,100,200],
-                    "off": [100,200,100,200]
-                })).to.equal((1000000/300));
             });
         });
 
