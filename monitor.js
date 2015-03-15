@@ -55,22 +55,26 @@ var setupVitals = function () {
 var setupLogger = function () {
     logger.remove(logger.transports.Console);
 
-    if (process.env.POWER_ENV === "development") {
-        console.log("Logging to: Console.\n");
-        logger.add(logger.transports.Console, {
-            colorize: true,
-            timestamp: true
-        });
-    } else {
-        console.log("Logging to: ", config.logfile, "\n");
-        logger.add(logger.transports.File, {
-            colorize:  true,
-            timestamp: true,
-            filename: config.logfile,
-            json: false
-        });
+    switch(process.env.POWER_ENV) {
+        case "development":
+        case "integration":
+        case "test":
+            console.log("Logging to: Console.\n");
+            logger.add(logger.transports.Console, {
+                colorize: true,
+                timestamp: true
+            });
+            break;
+        default:
+            console.log("Logging to: ", config.logfile, "\n");
+            logger.add(logger.transports.File, {
+                colorize:  true,
+                timestamp: true,
+                filename: config.logfile,
+                json: false
+            });
+            break;
     }
-
 };
 
 domain.on("error", function (err) {
@@ -93,10 +97,28 @@ domain.run(function () {
     setupLogger();
     setupVitals();
 
+    logger.info("Connecting to serial port: ", config.serial.dev);
+
     var meter = new Meter();
+    var sp = new serialport.SerialPort(config.serial.dev, {
+        baudrate: 115200,
+        parser: serialport.parsers.readline("\n")
+    }, false);
+
+    sp.open(function() {
+        logger.info("Successfully connected to serial port " + config.serial.dev);
+        sp.on("data", function (data) {
+            meter.handleData(data, meter);
+        });
+
+        sp.on("error", function (err) {
+            logger.error("Got error from serialport:", err.message);
+            process.exit(1);
+        });
+    });
+
     meter.startMonitor({
         "redis":      redis,
-        "serialport": serialport,
         "config":     config
     });
 
