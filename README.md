@@ -1,6 +1,7 @@
 [![npm version](https://badge.fury.io/js/power-meter-monitor.svg)](http://badge.fury.io/js/power-meter-monitor)
 [![Build Status](https://travis-ci.org/tfmalt/power-meter-monitor.svg?branch=master)](https://travis-ci.org/tfmalt/power-meter-monitor)
 [![Code Climate](https://codeclimate.com/github/tfmalt/power-meter-monitor/badges/gpa.svg)](https://codeclimate.com/github/tfmalt/power-meter-monitor)
+[![Test Coverage](https://codeclimate.com/github/tfmalt/power-meter-monitor/badges/coverage.svg)](https://codeclimate.com/github/tfmalt/power-meter-monitor)
 
 # Power Meter Monitor
 
