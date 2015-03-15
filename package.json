@@ -9,13 +9,13 @@
   },
   "private": false,
   "dependencies": {
-    "forever": "^0.13.0",
+    "forever": "^0.14.1",
     "q": "^1.1.1",
     "redis": "^0.12.1",
     "serialport": "^1.4.6",
     "underscore": "^1.7.0",
     "vitalsigns": "^0.4.3",
-    "winston": "^0.8.3"
+    "winston": "^0.9.0"
   },
   "devDependencies": {
     "blanket": ">= 1.1.5",
