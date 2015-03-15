@@ -8,7 +8,7 @@
 var chai        = require('chai'),
     chaipromise = require('chai-as-promised'),
     expect      = chai.expect,
-    Meter       = require('../lib/main').Meter,
+    Meter       = require('../lib/main').MinimalMeter,
     serialport  = require('serialport'),
     logger      = require('winston'),
     fakeredis   = require('fakeredis'),

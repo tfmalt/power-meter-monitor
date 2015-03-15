@@ -7,7 +7,7 @@
  * @copyright 2013-2015 (c) Thomas Malt <thomas@malt.no>
  */
 var config     = require('./config'),
-    Meter      = require('./lib/main').Meter,
+    Meter      = require('./lib/main').MinimalMeter,
     logger     = require('winston'),
     VitalSigns = require('vitalsigns'),
     serialport = require('serialport'),

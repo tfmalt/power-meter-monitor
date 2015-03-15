@@ -23,20 +23,32 @@ Timer t;
 const int sensorPin = 3;
 const int blinkPin  = 13;
 
-unsigned long counter, kwhCounter, time;
+int ledPin, ledMax; 
+int ledPins[] = {4,5,6,7,8,9,10,11};
+
+unsigned long counter, kwhCounter, time, pulseTime, waitTime;
+unsigned long pulseLength, waitLength;
+
 boolean light, inPulse;
- 
-/**
- * The default setup 
- */ 
+
+String highValues = "[";
+  
 void setup()
 {
     counter     = 0;
     kwhCounter  = 0;
     light       = LOW;
     inPulse     = false;
+    ledPin      = 0;
+    ledMax      = 8;
 
     pinMode(blinkPin, OUTPUT);
+
+    int i;
+    for (i = ledPin; i < ledMax; i++)
+    {
+        pinMode(ledPins[i], OUTPUT);
+    }
 
     int tickEvent = t.every(1000, sendUpdate, (void*)2);
 
@@ -60,23 +72,59 @@ void loop()
 
 void startPulse() 
 {
-    inPulse = true;
+    pulseTime = micros();
+    inPulse   = true;
+
+    waitLength = micros() - waitTime;
+    highValues += "\"off:";
+    highValues += waitLength;
+    highValues += "\",";
     digitalWrite(blinkPin, HIGH);
 }
 
 void endPulse() 
 {
     digitalWrite(blinkPin, LOW);
-    inPulse = false;
+    waitTime = micros();
+   
+    pulseLength = micros() - pulseTime;
+
+    highValues += "\"on:";
+    highValues += pulseLength;
+    highValues += "\",";
+
+    inPulse     = false;
 
     counter++;
     kwhCounter++;
+
+}
+
+void updateLeds() 
+{
+    int binCounter = map(kwhCounter, 0, 10000, 0, 255);
+    int pin = 0;
+
+    while (binCounter > 0) 
+    {
+        digitalWrite(ledPins[pin], (binCounter%2) ? HIGH : LOW);
+        binCounter = binCounter/2;
+        pin++;
+    }
+
+    while (pin < ledMax) 
+    {
+        digitalWrite(ledPins[pin], LOW);
+        pin++;
+    }
 }
 
 
 void sendUpdate(void* context) 
 {
     time = millis();
+
+    highValues += "0]";
 
     Serial.print("{");
     Serial.print("\"pulseCount\": \"");
@@ -85,18 +133,23 @@ void sendUpdate(void* context)
     Serial.print(kwhCounter);
     Serial.print("\", \"timestamp\": \"");
     Serial.print(time);
-    Serial.println("\"}");
+    Serial.print("\", \"pulsetimes\": ");
+    Serial.print(highValues);
+    Serial.println("}");
 
     counter = 0;
-    if (kwhCounter > 10000) {
-        kwhCounter = 0;
-    }
+    highValues = "[";
+
+    if (kwhCounter > 10000) kwhCounter = 0;
+
+    updateLeds();
 }
+
 
 /*
  * MIT LICENSE
  * 
- * Copyright (C) 2013-2015 Thomas Malt <thomas@malt.no>
+ * Copyright (C) 2013-2014 Thomas Malt <thomas@malt.no>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining 
  * a copy of this software and associated documentation files (the 
