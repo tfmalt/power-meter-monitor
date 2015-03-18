@@ -23,7 +23,7 @@ Timer t;
 const int sensorPin = 3;
 const int blinkPin  = 13;
 
-unsigned long counter, kwhCounter, time;
+unsigned long counter;
 boolean light, inPulse;
  
 /**
@@ -32,7 +32,6 @@ boolean light, inPulse;
 void setup()
 {
     counter     = 0;
-    kwhCounter  = 0;
     light       = LOW;
     inPulse     = false;
 
@@ -43,7 +42,6 @@ void setup()
     Serial.begin(115200);
     Serial.flush();
     Serial.println("                                                        ");
-    Serial.println("                                                        ");
     Serial.println("{\"BEGIN\": 1}");
     Serial.flush();
 }
@@ -52,45 +50,27 @@ void loop()
 {
     light = digitalRead(sensorPin);
 
-    if (light == HIGH && inPulse == false) startPulse();
-    if (light == LOW  && inPulse == true)  endPulse();
+    if (light == HIGH && inPulse == false) {
+        inPulse = true;
+        digitalWrite(blinkPin, HIGH);
+    } else if (light == LOW  && inPulse == true) {
+        digitalWrite(blinkPin, LOW);
+        inPulse = false;
+        counter++;
+    }
 
     t.update();
-}
-
-void startPulse() 
-{
-    inPulse = true;
-    digitalWrite(blinkPin, HIGH);
-}
-
-void endPulse() 
-{
-    digitalWrite(blinkPin, LOW);
-    inPulse = false;
-
-    counter++;
-    kwhCounter++;
 }
 
 
 void sendUpdate(void* context) 
 {
-    time = millis();
-
-    Serial.print("{");
-    Serial.print("\"pulseCount\": \"");
-    Serial.print(counter);
-    Serial.print("\", \"kwhCount\": \"");
-    Serial.print(kwhCounter);
-    Serial.print("\", \"timestamp\": \"");
-    Serial.print(time);
-    Serial.println("\"}");
+    String json = String("{\"pulseCount\": ");    
+    json = json + counter + "}";
 
     counter = 0;
-    if (kwhCounter > 10000) {
-        kwhCounter = 0;
-    }
+
+    Serial.println(json);
 }
 
 /*
