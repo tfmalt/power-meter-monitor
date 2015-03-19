@@ -112,7 +112,7 @@ describe('Power Meter Verbose Monitor', function () {
             var meter = new Meter();
 
             it('should return nothing', function () {
-                expect(meter.handleTimer()).to.be.undefined;
+                expect(meter.handleTimer()).to.have.property("second");
             });
         });
 
