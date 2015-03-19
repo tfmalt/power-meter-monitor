@@ -155,14 +155,16 @@ describe('Power Meter Minimal Monitor', function () {
             });
         });
 
+
         describe('addTotalDelta', function () {
             var meter = new Meter();
             meter.db = meter.getRedisClient(fakeredis, config.redis);
-
+            meter.db.set("meterTotal", "{\"timestmamp\": \"21:47\", \"value\": 10000}");
             it('should work as promised', function() {
-                return expect(meter.addTotalDelta({"pulseCount": 10})).to.eventually.equal(0.001);
+                return expect(meter.addTotalDelta({"pulseCount": 10})).to.eventually.equal(10000.001);
             });
         });
+
 
         describe('storeMinuteInDay', function() {
             var meter = new Meter();
