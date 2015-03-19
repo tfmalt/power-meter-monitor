@@ -163,7 +163,9 @@ describe('Power Meter Verbose Monitor', function () {
             meter.db = meter.getRedisClient(fakeredis, config.redis);
 
             it('should work as promised', function() {
-                return expect(meter.addTotalDelta({"pulseCount": 10})).to.eventually.equal(10000.002);
+                return expect(meter.addTotalDelta({
+                    "pulseCount": 10
+                })).to.eventually.equal(10000.0018);
             });
         });
 
