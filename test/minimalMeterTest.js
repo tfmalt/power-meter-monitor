@@ -4,6 +4,7 @@
  * @type {exports.expect}
  */
 
+console.log("directory: ", process.cwd());
 
 var chai        = require('chai'),
     sinon       = require('sinon'),
