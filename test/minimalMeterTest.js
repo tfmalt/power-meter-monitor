@@ -261,6 +261,8 @@ describe('Power Meter Monitor', function () {
 
             it('should return undefined on valid data', function() {
                 expect(meter.handlePulseCount({
+                    "outsidePulse": [1, 2, 3, 4],
+                    "insidePulse": [1, 2, 3, 4],
                     "pulseCount": 4,
                     "kwhCount": 5239,
                     "timestamp": 436783000
