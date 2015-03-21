@@ -1,7 +1,7 @@
 {
   "name": "power-meter-monitor",
   "main": "lib/main.js",
-  "version": "1.1.5",
+  "version": "1.2.5",
   "author": "Thomas Malt",
   "description": "Reading and logging electrical power meter by connecting to an arduino board",
   "repository": {
@@ -34,6 +34,6 @@
     "npm": ">= 1.3.x"
   },
   "scripts": {
-    "test": "POWER_ENV=test istanbul cover _mocha -- -R min"
+    "test": "POWER_ENV=test istanbul cover _mocha -- -R spec"
   }
 }
