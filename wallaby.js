@@ -4,6 +4,7 @@ module.exports = function () {
         files: [
             "config-test.js",
             "package.json",
+            "monitor.js",
             "lib/*.js"
         ],
 
@@ -17,6 +18,10 @@ module.exports = function () {
             params: {
                 env: "POWER_ENV=test; TZ=Europe/Oslo; NODE_PATH=$NODE_PATH:/Users/tm/PhpstormProjects/power-meter-monitor"
             }
+        },
+
+        workers: {
+            recycle: true
         }
     }
 };
