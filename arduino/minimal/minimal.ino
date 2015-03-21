@@ -60,23 +60,23 @@ void loop()
     unsigned long time  = millis();
 
     if (light == HIGH && inPulse == false) {
-        verifyInPulse++;
-        if (verifyInPulse > 5) {
-            digitalWrite(blinkPin, HIGH);
-            inPulse = true;
-            insidePulse = time;
-            outside = outside + (insidePulse - outsidePulse) + ", ";
-            verifyInPulse = 0; 
-        }
+        digitalWrite(blinkPin, HIGH);
+
+        insidePulse = time;
+        unsigned int length = insidePulse - outsidePulse;
+
+        inPulse = true;
+        outside = outside + length + ", ";
     } else if (light == LOW  && inPulse == true) {
-        verifyOffPulse++;
-        if (verifyOffPulse > 55555) {
-            digitalWrite(blinkPin, LOW);
+        digitalWrite(blinkPin, LOW);
+
+        outsidePulse = time;
+        unsigned int length = outsidePulse - insidePulse;
+
+        if (length > 7) {
             inPulse = false;
-            outsidePulse = time;
-            pulses = pulses + (outsidePulse - insidePulse) + ", ";
+            pulses = pulses + length + ", ";
             counter++;
-            verifyOffPulse = 0;
         }
     }
 
