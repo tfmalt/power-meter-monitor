@@ -77,6 +77,33 @@ var setupLogger = function () {
     }
 };
 
+
+/**
+ * Setup the serial port and connect events to functions in the power-meter object.
+ *
+ * @param meter power meter object.
+ */
+var setupSerialport = function (meter) {
+    "use strict";
+    logger.info("Connecting to serial port: ", config.serial.dev);
+    var sp = new serialport.SerialPort(config.serial.dev, {
+        baudrate: 115200,
+        parser: serialport.parsers.readline("\n")
+    }, false);
+
+    sp.open(function () {
+        logger.info("Successfully connected to serial port " + config.serial.dev);
+        sp.on("data", function (data) {
+            meter.handleData(data, meter);
+        });
+
+        sp.on("error", function (err) {
+            logger.error("Got error from serialport:", err.message);
+            process.exit(1);
+        });
+    });
+};
+
 domain.on("error", function (err) {
     "use strict";
     logger.error("Got an error event stack trace:", err.message, err.stack);
@@ -97,30 +124,17 @@ domain.run(function () {
     setupLogger();
     setupVitals();
 
-    logger.info("Connecting to serial port: ", config.serial.dev);
+    var client = redis.createClient(
+        config.redis.port,
+        config.redis.host,
+        config.redis.options
+    );
 
-    var meter = new Meter();
-    var sp = new serialport.SerialPort(config.serial.dev, {
-        baudrate: 115200,
-        parser: serialport.parsers.readline("\n")
-    }, false);
+    var meter = new Meter(client);
 
-    sp.open(function() {
-        logger.info("Successfully connected to serial port " + config.serial.dev);
-        sp.on("data", function (data) {
-            meter.handleData(data, meter);
-        });
+    setupSerialport(meter);
 
-        sp.on("error", function (err) {
-            logger.error("Got error from serialport:", err.message);
-            process.exit(1);
-        });
-    });
-
-    meter.startMonitor({
-        "redis":      redis,
-        "config":     config
-    });
+    meter.startMonitor();
 
     logger.info(
         "Power meter monitoring v%s started in master script",
