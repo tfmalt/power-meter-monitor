@@ -324,6 +324,12 @@ describe('Power Meter Monitor', function () {
         });
 
         describe('storeFiveMinutesInWeek', function() {
+            beforeEach(function (done) {
+                "use strict";
+                meter.db.lpush("day", "{}");
+                done();
+            });
+
             it('should work as promised', function() {
                 return expect(meter.storeFiveMinutesInWeek()).to.eventually.have.all.keys([
                     "listType", "perMinute", "total", "timestr", "timestamp"
@@ -333,6 +339,12 @@ describe('Power Meter Monitor', function () {
         });
 
         describe('storeThirtyMinutesInMonth', function() {
+            beforeEach(function (done) {
+                "use strict";
+                meter.db.rpush("day", "{}");
+                done();
+            });
+
             it('should work as promised', function() {
                 return expect(meter.storeThirtyMinutesInMonth()).to.eventually.have.all.keys([
                     "listType", "perMinute", "total", "timestr", "timestamp"
@@ -341,6 +353,11 @@ describe('Power Meter Monitor', function () {
         });
 
         describe('storeSixHoursInYear', function() {
+            beforeEach(function (done) {
+                "use strict";
+                meter.db.rpush("week", "{}");
+                done();
+            });
             it('should work as promised', function() {
                 return expect(meter.storeSixHoursInYear()).to.eventually.have.all.keys([
                     "listType", "perFiveMinutes", "total", "timestr", "timestamp"

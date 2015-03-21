@@ -21,7 +21,7 @@ module.exports = function () {
         },
 
         workers: {
-            recycle: true
+            recycle: false
         }
     }
 };
