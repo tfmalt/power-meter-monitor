@@ -5,274 +5,161 @@
  */
 
 
-var chai        = require('chai'),
+var chai = require('chai'),
     chaipromise = require('chai-as-promised'),
-    expect      = chai.expect,
-    Meter       = require('../lib/main').VerboseMeter,
-    serialport  = require('serialport'),
-    fakeredis   = require('fakeredis'),
-    config      = require('../config-test');
+    expect = chai.expect,
+    powermeter = require('../lib/main'),
+    serialport = require('serialport'),
+    fakeredis = require('fakeredis'),
+    config = require('../config-test');
 
 chai.use(chaipromise);
 
-describe('Power Meter Verbose Monitor', function () {
-    describe('meter', function () {
-        var m = new Meter();
+describe('Power Meter Monitor', function () {
+    describe('VerboseMeter', function () {
+        var meter;
+        beforeEach(function (done) {
+            meter = new powermeter.VerboseMeter(fakeredis.createClient());
+            done();
+        });
+
+        afterEach(function (done) {
+            "use strict";
+            meter = undefined;
+            done();
+        });
+
 
         it('should be an Object', function () {
-            expect(m).to.be.instanceOf(Meter);
+            expect(meter).to.be.instanceOf(powermeter.VerboseMeter);
         });
 
         it('should have correct initial values', function () {
-            expect(m.db).to.be.null;
-            expect(m.hasBegun).to.be.false;
+            expect(meter.db).to.be.instanceOf(fakeredis.RedisClient);
+            expect(meter.hasBegun).to.be.false;
         });
 
-
-        describe('startMonitor', function () {
-            var meter = new Meter();
-
-            it('should throw error when passed undefined config object', function () {
-                expect(meter.startMonitor).to.throw(Error);
+        describe('average', function () {
+            "use strict";
+            it('should calculate the correct average', function () {
+                expect(meter.average([3, 4, 5])).to.equal(4);
             });
 
-            it('should throw error when redis not object', function () {
-                expect(meter.startMonitor.bind(meter, {
-                    "config": config
-                })).to.throw(Error);
+            it('should throw error when passed no array', function () {
+                expect(meter.average).to.throw(Error);
             });
 
-            it('should throw error when config not object', function () {
-                expect(meter.startMonitor.bind(meter, {
-                    "redis": fakeredis
-                })).to.throw(Error);
+            it('should calculate correctly with empty array', function () {
+                expect(meter.average([])).to.be.undefined;
             });
-
-            it('should return undefined when everything is ok', function () {
-                expect(meter.startMonitor({
-                    "redis": fakeredis,
-                    "config": config
-                })).to.be.undefined;
-            });
-
         });
 
-        describe('handleData', function () {
-            var meter = new Meter();
-            it('should find asBegun is false', function () {
-                expect(meter.hasBegun).to.be.false;
+        describe('median', function () {
+            "use strict";
+            it('should calculate median correctly', function () {
+                expect(meter.median([1, 2, 3, 4])).to.equal(3);
+                expect(meter.median([1, 3, 4])).to.equal(3);
             });
-
-            it('should return undefined when not beginning and reads noise', function () {
-                expect(meter.handleData("Hello there line noise", meter)).to.be.undefined;
-            });
-
-            it('should behave correctly when receiving BEGIN json', function () {
-                expect(meter.handleData('{"BEGIN": 1}', meter)).to.be.undefined;
-            });
-
-            it('should have begun - hasBegun should be true', function() {
-                expect(meter.hasBegun).to.be.true;
-            });
-
-            it('should behave correctly when hasBegun is true', function () {
-                expect(meter.handleData("hello there", meter)).to.be.true;
-                expect(meter.handleData('{"foo": 1, "bar": 2}', meter)).to.be.true;
-            });
-
         });
 
-
-        describe('isValidData', function () {
-            var meter = new Meter();
-
-            it('should return false on non json', function () {
-                expect(meter.isValidData("hello not json")).to.be.false;
+        describe('splitPulsetimes', function () {
+            "use strict";
+            it('should split times correctly', function () {
+                expect(meter.splitPulsetimes(["on: 1", "off: 2", 0])).to.deep.equal({
+                    on: [1], off: [2]
+                });
             });
 
-            it('should return true when it gets json', function () {
-                expect(meter.isValidData('{"foo": 1, "bar": "to"}')).to.be.true;
+            it('should throw error when passed incorrect argument', function () {
+                expect(meter.splitPulsetimes.bind(meter, "hello")).to.throw(TypeError);
+            });
+        });
+
+        describe('calcPulseStats', function () {
+            "use strict";
+            it('should throw error when called without args', function () {
+                expect(meter.calcPulseStats).to.throw(Error);
+            });
+
+            it('should calculate stats correctly', function () {
+                expect(meter.calcPulseStats([1, 2, 3, 4])).to.deep.equal({
+                    max: 4,
+                    min: 1,
+                    average: 3,
+                    median: 3,
+                    max_deviation: (1 / 3),
+                    min_deviation: (2 / 3)
+                });
+            });
+        });
+
+        describe('getMedianPulse', function () {
+            "use strict";
+            it('should return the median pulse length', function () {
+                expect(meter.getMedianPulse({
+                    on: [1, 2, 3], off: [1, 3, 4]
+                })).to.equal(200000);
             });
         });
 
 
-        describe('isBeginning', function () {
-            var meter = new Meter();
-            it('should return false when string is not BEGIN', function () {
-                expect(meter.isBeginning('{"foo": 1, "bar": "to"}')).to.be.false;
-            });
-
-            it('should return true when string is BEGINNING', function () {
-                expect(meter.isBeginning('{"BEGIN": 1}')).to.be.true;
+        describe('getAveragePulse', function () {
+            "use strict";
+            it('should return correct average pulse length', function () {
+                expect(meter.getAveragePulse({
+                    on: [1, 2, 3, 4], off: [1, 2, 3, 4]
+                })).to.equal(200000);
             });
         });
 
+        describe('calcAdjustedCount', function () {
+            "use strict";
+            it('should return adjusted count correctly', function () {
+                expect(meter.calcAdjustedCount({
+                    on: {
+                        max: 4, min: 1, average: 3, max_deviation: 3,
+                        min_deviation: 3
+                    },
+                    off: {
+                        max: 4, min: 1, average: 3, max_deviation: 3,
+                        min_deviation: 3
+                    }
+                })).to.equal(1);
+            });
 
-        describe('handleTimer', function () {
-            var meter = new Meter();
+            it('should return adjusted count correctly', function () {
+                expect(meter.calcAdjustedCount({
+                    on: {
+                        max: 4, min: 1, average: 3, max_deviation: 0.5,
+                        min_deviation: 3
+                    },
+                    off: {
+                        max: 4, min: 1, average: 3, max_deviation: 3,
+                        min_deviation: 3
+                    }
+                })).to.equal(1);
+            });
+        });
 
+        describe('printPulseCountersLog', function () {
+            "use strict";
             it('should return nothing', function () {
-                expect(meter.handleTimer()).to.have.property("second");
+                expect(meter.printPulseCountersLog({})).to.be.undefined;
             });
         });
 
-        describe('handlePulseCount', function () {
-            var meter = new Meter();
-
-            it('should return undefined on invalid data', function () {
-                expect(meter.handlePulseCount("foo")).to.be.undefined;
-            });
-
-            it('should return undefined on valid data', function() {
-                expect(meter.handlePulseCount({
-                    "pulseCount": 4,
-                    "kwhCount": 5239,
-                    "timestamp": 436783000
-                })).to.be.undefined;
-            });
-        });
-
-
-        describe('storeSecondInHour', function() {
-            var meter = new Meter();
-
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
-            it('should have a valid redis client', function() {
+        describe('storeSecondInHour', function () {
+            it('should have a valid redis client', function () {
                 expect(meter.db).to.respondTo('rpush');
             });
 
-            it('should work as promised', function() {
+            it('should work as promised', function () {
                 return expect(meter.storeSecondInHour({
-                    "pulseCount": 3,
-                    "kwhCount": 5239,
-                    "timestamp": 436783000,
-                    "pulsetimes": [
-                        "off:206256", "on:8408", "off:202452", "on:8308",
-                        "off:206684", "on:8464", "off:206368", "on:8468", 0
-                    ]
-                })).to.eventually.have.all.keys([
-                    'pulseCount', 'kwhCount', 'pulsetimes',
-                    'timestamp', 'listType'
-                ]);
-            });
-        });
-
-        describe('addTotalDelta', function () {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-            meter.db.set("meterTotal", "{\"timestmamp\": \"21:47\", \"value\": 10000}");
-            it('should work as promised', function() {
-                return expect(meter.addTotalDelta({
-                    "pulseCount": 10
-                })).to.eventually.equal(10000.0018);
-            });
-        });
-
-        describe('storeMinuteInDay', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
-            it('should have correct listType', function() {
-                return expect(meter.storeMinuteInDay()).to.eventually.have.property("listType", "day");
-            });
-
-            it('should work as promised', function() {
-                return expect(meter.storeMinuteInDay()).to.eventually.have.all.keys([
-                    'listType',
-                    'timestamp',
-                    'timestr',
-                    'sum',
-                    'total',
-                    'values',
-                    'max',
-                    'min',
-                    'average'
-                ]);
-            });
-        });
-
-        describe('storeFiveMinutesInWeek', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
-            it('should work as promised', function() {
-                return expect(meter.storeFiveMinutesInWeek()).to.eventually.have.all.keys([
-                    "listType", "perMinute", "total", "timestr", "timestamp"
-                ]);
-            });
-
-        });
-
-        describe('storeThirtyMinutesInMonth', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
-            it('should work as promised', function() {
-                return expect(meter.storeThirtyMinutesInMonth()).to.eventually.have.all.keys([
-                    "listType", "perMinute", "total", "timestr", "timestamp"
-                ]);
-            });
-        });
-
-        describe('storeSixHoursInYear', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
-            it('should work as promised', function() {
-                return expect(meter.storeSixHoursInYear()).to.eventually.have.all.keys([
-                    "listType", "perFiveMinutes", "total", "timestr", "timestamp"
-                ]);
-            });
-        });
-
-        describe('storeHour', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
-            it('should return data as promised', function() {
-                return expect(meter.storeHour()).to.eventually.have.all.keys([
-                    "datestr", "kwh", "timestamp", "total"
-                ]);
-            });
-        });
-
-        describe('storeDay', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
-            it('should return data as promised', function() {
-                return expect(meter.storeDay()).to.eventually.have.all.keys([
-                    "timestamp", "timestr", "kwh", "total"
-                ]);
-            });
-        });
-
-        describe('storeWeek', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
-            it('should work as promised', function() {
-                return expect(meter.storeWeek()).to.eventually.have.all.keys([
-                    "timestamp", "timestr", "kwh", "total"
-                ]);
-            });
-        });
-
-        describe('verifyLimit', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
-            for (var i = 0; i < 1560; i++) {
-                meter.db.rpush("day", JSON.stringify({"sum": i}));
-            }
-
-            it('should return false', function() {
-                return expect(meter.verifyLimit({"listType": "hour"})).to.eventually.be.false;
-            });
-
-            it('should return true', function() {
-                return expect(meter.verifyLimit({"listType": "day"})).to.eventually.be.true;
+                    "pulseCount": 3, "timestamp": "2000",
+                    "pulsetimes": ["on: 1", "off: 2", 0]
+                })).to.eventually.have.all.keys(
+                    ['pulseCount', 'pulsetimes', 'timestamp', 'listType']
+                );
             });
         });
     });
