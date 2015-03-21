@@ -87,10 +87,10 @@ void loop()
 void sendUpdate(void* context) 
 {
     String json = String("{\"pulseCount\": ");    
-    json += counter + ", ";
-    json += "\"outside\": " + outside + "0], ";
-    json += "\"inside\": " + pulses + "0]";
-    json += "}";
+    json = json + counter + ", ";
+    json = json + "\"outsidePulse\": " + outside + "0], ";
+    json = json + "\"insidePulse\": " + pulses + "0]";
+    json = json + "}";
 
     counter = 0;
     outside = "[";
