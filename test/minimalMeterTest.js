@@ -10,7 +10,7 @@ var chai        = require('chai'),
     sinon       = require('sinon'),
     chaipromise = require('chai-as-promised'),
     expect      = chai.expect,
-    Meter       = require('../lib/main').MinimalMeter,
+    pm = require('../lib/main'),
     serialport  = require('serialport'),
     logger      = require('winston'),
     fakeredis   = require('fakeredis'),
@@ -18,69 +18,65 @@ var chai        = require('chai'),
 
 chai.use(chaipromise);
 
-logger.remove(logger.transports.Console);
+try {
+    logger.remove(logger.transports.Console);
+}
+catch (e) {
+    // ignore
+}
 
-describe('Power Meter Minimal Monitor', function () {
-    describe('meter', function () {
-        var m = new Meter();
+describe('Power Meter Monitor', function () {
+    describe('MinimalMeter', function () {
+        var meter;
+        beforeEach(function (done) {
+            meter = new pm.MinimalMeter(fakeredis.createClient());
+            done();
+        });
+
+        afterEach(function (done) {
+            "use strict";
+            meter = undefined;
+            done();
+        });
+
+        it('should throw TypeError when not passed a valid redis client', function () {
+            "use strict";
+            var testFn = function () {
+                new pm.MinimalMeter();
+            };
+
+            expect(testFn).to.throw(TypeError);
+        });
 
         it('should be an Object', function () {
-            expect(m).to.be.instanceOf(Meter);
+            expect(meter).to.be.instanceOf(pm.MinimalMeter);
         });
 
         it('should have correct initial values', function () {
-            expect(m.db).to.be.null;
-            expect(m.hasBegun).to.be.false;
+            expect(meter.db).to.be.instanceOf(fakeredis.RedisClient);
+            expect(meter.hasBegun).to.be.false;
         });
 
 
         describe('startMonitor', function () {
-            var meter = new Meter();
-
-            it('should throw error when passed undefined config object', function () {
-                expect(meter.startMonitor).to.throw(Error);
-            });
-
-            it('should throw error when redis not object', function () {
-                expect(meter.startMonitor.bind(meter, {
-                    "config": config
-                })).to.throw(Error);
-            });
-
-            it('should throw error when config not object', function () {
-                expect(meter.startMonitor.bind(meter, {
-                    "redis": fakeredis
-                })).to.throw(Error);
-            });
-
-            it('should return undefined when everything is ok', function () {
-                expect(meter.startMonitor({
-                    "redis": fakeredis,
-                    "config": config
-                })).to.be.undefined;
+            it('should finish without error', function () {
+                expect(meter.startMonitor()).to.be.undefined;
             });
 
         });
 
         describe('handleData', function () {
-            var meter = new Meter();
             it('should find asBegun is false', function () {
                 expect(meter.hasBegun).to.be.false;
             });
 
             it('should return undefined when not beginning and reads noise', function () {
-                expect(meter.handleData("Hello there line noise", meter)).to.be.undefined;
+                expect(meter.handleData("Hello there line noise", meter)).to.be.false;
             });
 
             it('should behave correctly when receiving BEGIN json', function () {
-                expect(meter.handleData('{"BEGIN": 1}', meter)).to.be.undefined;
-            });
-
-            it('should have begun - hasBegun should be true', function() {
+                expect(meter.handleData('{"BEGIN": 1}', meter)).to.be.true;
                 expect(meter.hasBegun).to.be.true;
-            });
-
-            it('should behave correctly when hasBegun is true', function () {
                 expect(meter.handleData("hello there", meter)).to.be.true;
                 expect(meter.handleData('{"foo": 1, "bar": 2}', meter)).to.be.true;
             });
@@ -89,8 +85,6 @@ describe('Power Meter Minimal Monitor', function () {
 
 
         describe('isValidData', function () {
-            var meter = new Meter();
-
             it('should return false on non json', function () {
                 expect(meter.isValidData("hello not json")).to.be.false;
             });
@@ -102,7 +96,6 @@ describe('Power Meter Minimal Monitor', function () {
 
 
         describe('isBeginning', function () {
-            var meter = new Meter();
             it('should return false when string is not BEGIN', function () {
                 expect(meter.isBeginning('{"foo": 1, "bar": "to"}')).to.be.false;
             });
@@ -115,7 +108,6 @@ describe('Power Meter Minimal Monitor', function () {
 
         describe('handleTimer', function () {
             var clock;
-            var meter = new Meter();
 
             before(function() {
                 clock = sinon.useFakeTimers();
@@ -263,8 +255,6 @@ describe('Power Meter Minimal Monitor', function () {
         });
 
         describe('handlePulseCount', function () {
-            var meter = new Meter();
-
             it('should return undefined on invalid data', function () {
                 expect(meter.handlePulseCount("foo")).to.be.undefined;
             });
@@ -280,10 +270,6 @@ describe('Power Meter Minimal Monitor', function () {
 
 
         describe('storeSecondInHour', function() {
-            var meter = new Meter();
-
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
             it('should have a valid redis client', function() {
                 expect(meter.db).to.respondTo('rpush');
             });
@@ -300,9 +286,10 @@ describe('Power Meter Minimal Monitor', function () {
 
 
         describe('addTotalDelta', function () {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-            meter.db.set("meterTotal", "{\"timestmamp\": \"21:47\", \"value\": 10000}");
+            beforeEach(function () {
+                meter.db.set("meterTotal", "{\"timestmamp\": \"21:47\", \"value\": 10000}");
+            });
+
             it('should work as promised', function() {
                 return expect(meter.addTotalDelta({"pulseCount": 10})).to.eventually.equal(10000.0009);
             });
@@ -310,8 +297,10 @@ describe('Power Meter Minimal Monitor', function () {
 
 
         describe('storeMinuteInDay', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
+            beforeEach(function () {
+                "use strict";
+                meter.db.rpush("hour", "{}");
+            });
 
             it('should have correct listType', function() {
                 return expect(meter.storeMinuteInDay()).to.eventually.have.property("listType", "day");
@@ -333,9 +322,6 @@ describe('Power Meter Minimal Monitor', function () {
         });
 
         describe('storeFiveMinutesInWeek', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
             it('should work as promised', function() {
                 return expect(meter.storeFiveMinutesInWeek()).to.eventually.have.all.keys([
                     "listType", "perMinute", "total", "timestr", "timestamp"
@@ -345,9 +331,6 @@ describe('Power Meter Minimal Monitor', function () {
         });
 
         describe('storeThirtyMinutesInMonth', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
             it('should work as promised', function() {
                 return expect(meter.storeThirtyMinutesInMonth()).to.eventually.have.all.keys([
                     "listType", "perMinute", "total", "timestr", "timestamp"
@@ -356,9 +339,6 @@ describe('Power Meter Minimal Monitor', function () {
         });
 
         describe('storeSixHoursInYear', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
             it('should work as promised', function() {
                 return expect(meter.storeSixHoursInYear()).to.eventually.have.all.keys([
                     "listType", "perFiveMinutes", "total", "timestr", "timestamp"
@@ -367,8 +347,10 @@ describe('Power Meter Minimal Monitor', function () {
         });
 
         describe('storeHour', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
+            beforeEach(function () {
+                "use strict";
+                meter.db.rpush("day", "{}");
+            });
 
             it('should return data as promised', function() {
                 return expect(meter.storeHour()).to.eventually.have.all.keys([
@@ -378,9 +360,10 @@ describe('Power Meter Minimal Monitor', function () {
         });
 
         describe('storeDay', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
+            beforeEach(function () {
+                "use strict";
+                meter.db.rpush("day", "{}");
+            });
             it('should return data as promised', function() {
                 return expect(meter.storeDay()).to.eventually.have.all.keys([
                     "timestamp", "timestr", "kwh", "total"
@@ -389,9 +372,10 @@ describe('Power Meter Minimal Monitor', function () {
         });
 
         describe('storeWeek', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
+            beforeEach(function () {
+                "use strict";
+                meter.db.rpush("week", "{}");
+            });
             it('should work as promised', function() {
                 return expect(meter.storeWeek()).to.eventually.have.all.keys([
                     "timestamp", "timestr", "kwh", "total"
@@ -400,12 +384,12 @@ describe('Power Meter Minimal Monitor', function () {
         });
 
         describe('verifyLimit', function() {
-            var meter = new Meter();
-            meter.db = meter.getRedisClient(fakeredis, config.redis);
-
-            for (var i = 0; i < 1560; i++) {
-                meter.db.rpush("day", JSON.stringify({"sum": i}));
-            }
+            beforeEach(function (done) {
+                for (var i = 0; i < 1561; i++) {
+                    meter.db.rpush("day", JSON.stringify({"sum": i}));
+                }
+                done();
+            });
 
             it('should return false', function() {
                 return expect(meter.verifyLimit({"listType": "hour"})).to.eventually.be.false;
