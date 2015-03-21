@@ -23,17 +23,25 @@ Timer t;
 const int sensorPin = 3;
 const int blinkPin  = 13;
 
-unsigned long counter;
-boolean light, inPulse;
+unsigned int verifyInPulse, verifyOffPulse;
+unsigned long counter, insidePulse, outsidePulse;
+
+boolean inPulse;
+
+String pulses = "[";
+String outside = "[";
  
 /**
  * The default setup 
  */ 
 void setup()
 {
-    counter     = 0;
-    light       = LOW;
-    inPulse     = false;
+    counter        = 0;
+    verifyInPulse  = 0;
+    verifyOffPulse = 0;
+    insidePulse    = 0;
+    outsidePulse    = 0;
+    inPulse        = false;
 
     pinMode(blinkPin, OUTPUT);
 
@@ -41,22 +49,35 @@ void setup()
 
     Serial.begin(115200);
     Serial.flush();
-    Serial.println("                                                        ");
+    Serial.println("                                    ");
     Serial.println("{\"BEGIN\": 1}");
     Serial.flush();
 }
 
 void loop()
 {
-    light = digitalRead(sensorPin);
+    boolean       light = digitalRead(sensorPin);
+    unsigned long time  = millis();
 
     if (light == HIGH && inPulse == false) {
-        inPulse = true;
-        digitalWrite(blinkPin, HIGH);
+        verifyInPulse++;
+        if (verifyInPulse > 3) {
+            digitalWrite(blinkPin, HIGH);
+            inPulse = true;
+            insidePulse = time;
+            outside = outside + (insidePulse - outsidePulse) + ", ";
+            verifyInPulse = 0; 
+        }
     } else if (light == LOW  && inPulse == true) {
-        digitalWrite(blinkPin, LOW);
-        inPulse = false;
-        counter++;
+        verifyOffPulse++;
+        if (verifyOffPulse > 3) {
+            digitalWrite(blinkPin, LOW);
+            inPulse = false;
+            outsidePulse = time;
+            pulses = pulses + (outsidePulse - insidePulse) + ", ";
+            counter++;
+            verifyOffPulse = 0;
+        }
     }
 
     t.update();
@@ -66,9 +87,14 @@ void loop()
 void sendUpdate(void* context) 
 {
     String json = String("{\"pulseCount\": ");    
-    json = json + counter + "}";
+    json += counter + ", ";
+    json += "\"outside\": " + outside + "0], ";
+    json += "\"inside\": " + pulses + "0]";
+    json += "}";
 
     counter = 0;
+    outside = "[";
+    pulses  = "["; 
 
     Serial.println(json);
 }
