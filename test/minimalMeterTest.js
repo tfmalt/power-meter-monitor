@@ -312,7 +312,7 @@ describe('Power Meter Monitor', function () {
                 return expect(meter.storeMinuteInDay()).to.eventually.have.all.keys([
                     'listType',
                     'timestamp',
-                    'timestr',
+                    'date',
                     'sum',
                     'total',
                     'values',
@@ -332,7 +332,7 @@ describe('Power Meter Monitor', function () {
 
             it('should work as promised', function() {
                 return expect(meter.storeFiveMinutesInWeek()).to.eventually.have.all.keys([
-                    "listType", "perMinute", "total", "timestr", "timestamp"
+                    "listType", "perMinute", "total", "date", "timestamp"
                 ]);
             });
 
@@ -347,7 +347,7 @@ describe('Power Meter Monitor', function () {
 
             it('should work as promised', function() {
                 return expect(meter.storeThirtyMinutesInMonth()).to.eventually.have.all.keys([
-                    "listType", "perMinute", "total", "timestr", "timestamp"
+                    "listType", "perMinute", "total", "date", "timestamp"
                 ]);
             });
         });
@@ -360,7 +360,7 @@ describe('Power Meter Monitor', function () {
             });
             it('should work as promised', function() {
                 return expect(meter.storeSixHoursInYear()).to.eventually.have.all.keys([
-                    "listType", "perFiveMinutes", "total", "timestr", "timestamp"
+                    "listType", "perFiveMinutes", "total", "date", "timestamp"
                 ]);
             });
         });
@@ -373,7 +373,7 @@ describe('Power Meter Monitor', function () {
 
             it('should return data as promised', function() {
                 return expect(meter.storeHour()).to.eventually.have.all.keys([
-                    "datestr", "kwh", "timestamp", "total"
+                    "date", "kwh", "timestamp", "total"
                 ]);
             });
         });
@@ -385,7 +385,7 @@ describe('Power Meter Monitor', function () {
             });
             it('should return data as promised', function() {
                 return expect(meter.storeDay()).to.eventually.have.all.keys([
-                    "timestamp", "timestr", "kwh", "total"
+                    "timestamp", "date", "kwh", "total"
                 ]);
             });
         });
@@ -397,7 +397,7 @@ describe('Power Meter Monitor', function () {
             });
             it('should work as promised', function() {
                 return expect(meter.storeWeek()).to.eventually.have.all.keys([
-                    "timestamp", "timestr", "kwh", "total"
+                    "timestamp", "date", "kwh", "total"
                 ]);
             });
         });
