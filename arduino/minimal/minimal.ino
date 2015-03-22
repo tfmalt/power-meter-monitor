@@ -73,7 +73,7 @@ void loop()
         outsidePulse = time;
         unsigned int length = outsidePulse - insidePulse;
 
-        if (length > 7) {
+        if (length > 6) {
             inPulse = false;
             pulses = pulses + length + ", ";
             counter++;
