@@ -293,7 +293,7 @@ describe('Power Meter Monitor', function () {
             });
 
             it('should work as promised', function() {
-                return expect(meter.addTotalDelta({"pulseCount": 10})).to.eventually.equal(10000.0009);
+                return expect(meter.addTotalDelta({"pulseCount": 10})).to.eventually.equal(10000.001);
             });
         });
 
