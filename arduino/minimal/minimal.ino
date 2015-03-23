@@ -70,7 +70,7 @@ void loop()
             counter++;
         }
         // count extra pulse if length > 15ms
-        if (length > 15) {
+        if (length > 18) {
             counter++;
         }
     }
