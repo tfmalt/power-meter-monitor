@@ -69,10 +69,6 @@ void loop()
             inPulse = false;
             counter++;
         }
-        // count extra pulse if length > 15ms
-        if (length > 18) {
-            counter++;
-        }
     }
 
     t.update();
