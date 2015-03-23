@@ -23,25 +23,18 @@ Timer t;
 const int sensorPin = 3;
 const int blinkPin  = 13;
 
-unsigned int verifyInPulse, verifyOffPulse;
-unsigned long counter, insidePulse, outsidePulse;
-
+unsigned long counter, outsidePulse, insidePulse;
 boolean inPulse;
 
-String pulses = "[";
-String outside = "[";
- 
 /**
  * The default setup 
  */ 
 void setup()
 {
-    counter        = 0;
-    verifyInPulse  = 0;
-    verifyOffPulse = 0;
-    insidePulse    = 0;
-    outsidePulse    = 0;
-    inPulse        = false;
+    counter      = 0;
+    insidePulse  = 0;
+    outsidePulse = 0;
+    inPulse      = false;
 
     pinMode(blinkPin, OUTPUT);
 
@@ -58,24 +51,26 @@ void loop()
 {
     boolean       light = digitalRead(sensorPin);
     unsigned long time  = millis();
+    unsigned int  length;
 
     if (light == HIGH && inPulse == false) {
         digitalWrite(blinkPin, HIGH);
 
         insidePulse = time;
-        unsigned int length = insidePulse - outsidePulse;
-
         inPulse = true;
-        outside = outside + length + ", ";
     } else if (light == LOW  && inPulse == true) {
         digitalWrite(blinkPin, LOW);
 
         outsidePulse = time;
-        unsigned int length = outsidePulse - insidePulse;
+        length       = outsidePulse - insidePulse;
 
+        // count pulse if length is at least 6ms.
         if (length > 5) {
             inPulse = false;
-            pulses = pulses + length + ", ";
+            counter++;
+        }
+        // count extra pulse if length > 15ms
+        if (length > 15) {
             counter++;
         }
     }
@@ -83,20 +78,10 @@ void loop()
     t.update();
 }
 
-
 void sendUpdate(void* context) 
 {
-    String json = String("{\"pulseCount\": ");    
-    json = json + counter + ", ";
-    json = json + "\"outsidePulse\": " + outside + "0], ";
-    json = json + "\"insidePulse\": " + pulses + "0]";
-    json = json + "}";
-
+    Serial.println(counter);
     counter = 0;
-    outside = "[";
-    pulses  = "["; 
-
-    Serial.println(json);
 }
 
 /*

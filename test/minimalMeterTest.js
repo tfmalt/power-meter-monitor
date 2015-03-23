@@ -255,21 +255,28 @@ describe('Power Meter Monitor', function () {
         });
 
         describe('handlePulseCount', function () {
-            it('should return undefined on invalid data', function () {
-                expect(meter.handlePulseCount("foo")).to.be.undefined;
+            it('should throw error on invalid data', function () {
+                expect(meter.handlePulseCount.bind(meter, "foo")).to.throw(TypeError, /argument must/);
             });
 
             it('should return undefined on valid data', function() {
-                expect(meter.handlePulseCount({
+                expect(meter.handlePulseCount.bind(meter, {
                     "outsidePulse": [1, 2, 3, 4],
                     "insidePulse": [1, 2, 3, 4],
                     "pulseCount": 4,
                     "kwhCount": 5239,
                     "timestamp": 436783000
-                })).to.be.undefined;
+                })).to.throw(TypeError, /must be a number/);
+
+            });
+
+            it('should return undefined on valid data', function () {
+                "use strict";
+                expect(meter.handlePulseCount(10)).to.deep.equal({
+                    pulseCount: 10
+                });
             });
         });
-
 
         describe('storeSecondInHour', function() {
             it('should have a valid redis client', function() {
