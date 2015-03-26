@@ -264,7 +264,7 @@ describe('Power Meter Monitor', function () {
 
         describe('verifyLimit', function() {
             beforeEach(function (done) {
-                for (var i = 0; i < 1561; i++) {
+                for (var i = 0; i < 2000; i++) {
                     meter.db.rpush("day", JSON.stringify({"sum": i}));
                 }
                 done();
@@ -275,7 +275,7 @@ describe('Power Meter Monitor', function () {
             });
 
             it('should return true', function() {
-                return expect(meter.verifyLimit({"listType": "day"})).to.eventually.be.true;
+                return expect(meter.verifyLimit({"listType": "day"})).to.eventually.be.false;
             });
         });
 
