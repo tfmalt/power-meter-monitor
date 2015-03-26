@@ -14,6 +14,7 @@ var chai        = require('chai'),
     serialport  = require('serialport'),
     logger      = require('winston'),
     fakeredis   = require('fakeredis'),
+    cron        = require('cron-emitter'),
     config      = require('../config-test');
 
 chai.use(chaipromise);
@@ -105,154 +106,6 @@ describe('Power Meter Monitor', function () {
             });
         });
 
-
-        describe('handleTimer', function () {
-            var clock;
-
-            before(function() {
-                clock = sinon.useFakeTimers();
-            });
-
-            it('should return up to an hour', function () {
-                expect(meter.handleTimer()).to.deep.equal({
-                    second: 1,
-                    minute: 1,
-                    fiveMinute: 1,
-                    halfHour: 1,
-                    hour: 1,
-                    sixHour: 0,
-                    twelveHour: 0,
-                    midnight: 0,
-                    week: 0,
-                    month: 0,
-                    year: 0
-                });
-            });
-
-            it('should return up to midnight', function() {
-                clock.tick(23*60*60*1000);
-                expect(meter.handleTimer()).to.deep.equal({
-                    second: 1,
-                    minute: 1,
-                    fiveMinute: 1,
-                    halfHour: 1,
-                    hour: 1,
-                    sixHour: 1,
-                    twelveHour: 1,
-                    midnight: 1,
-                    week: 0,
-                    month: 0,
-                    year: 0
-                });
-            });
-
-            it('should return up to week', function() {
-                clock.tick(2*24*60*60*1000);
-                expect(meter.handleTimer()).to.deep.equal({
-                    second: 1,
-                    minute: 1,
-                    fiveMinute: 1,
-                    halfHour: 1,
-                    hour: 1,
-                    sixHour: 1,
-                    twelveHour: 1,
-                    midnight: 1,
-                    week: 1,
-                    month: 0,
-                    year: 0
-                });
-            });
-
-            it('should return up to a month', function() {
-                clock.tick(28*24*60*60*1000);
-                expect(meter.handleTimer()).to.deep.equal({
-                    second: 1,
-                    minute: 1,
-                    fiveMinute: 1,
-                    halfHour: 1,
-                    hour: 1,
-                    sixHour: 1,
-                    twelveHour: 1,
-                    midnight: 1,
-                    week: 1,
-                    month: 1,
-                    year: 0
-                });
-            });
-
-            it('should return up to a year', function() {
-                clock.tick(334*24*60*60*1000);
-                expect(meter.handleTimer()).to.deep.equal({
-                    second: 1,
-                    minute: 1,
-                    fiveMinute: 1,
-                    halfHour: 1,
-                    hour: 1,
-                    sixHour: 1,
-                    twelveHour: 1,
-                    midnight: 1,
-                    week: 0,
-                    month: 1,
-                    year: 1
-                });
-            });
-
-            it('should return empty for all', function() {
-                clock.tick(1000);
-                expect(meter.handleTimer()).to.deep.equal({
-                    second: 0,
-                    minute: 0,
-                    fiveMinute: 0,
-                    halfHour: 0,
-                    hour: 0,
-                    sixHour: 0,
-                    twelveHour: 0,
-                    midnight: 0,
-                    week: 0,
-                    month: 0,
-                    year: 0
-                });
-            });
-
-            it('should return only second and minute', function() {
-                clock.tick(59000);
-                expect(meter.handleTimer()).to.deep.equal({
-                    second: 1,
-                    minute: 1,
-                    fiveMinute: 0,
-                    halfHour: 0,
-                    hour: 0,
-                    sixHour: 0,
-                    twelveHour: 0,
-                    midnight: 0,
-                    week: 0,
-                    month: 0,
-                    year: 0
-                });
-            });
-
-            it('should return only up to fiveminute', function() {
-                clock.tick(4*60000);
-                expect(meter.handleTimer()).to.deep.equal({
-                    second: 1,
-                    minute: 1,
-                    fiveMinute: 1,
-                    halfHour: 0,
-                    hour: 0,
-                    sixHour: 0,
-                    twelveHour: 0,
-                    midnight: 0,
-                    week: 0,
-                    month: 0,
-                    year: 0
-                });
-            });
-
-            after(function () {
-                clock.restore();
-            });
-
-        });
 
         describe('handlePulseCount', function () {
             it('should throw error on invalid data', function () {
@@ -425,5 +278,13 @@ describe('Power Meter Monitor', function () {
                 return expect(meter.verifyLimit({"listType": "day"})).to.eventually.be.true;
             });
         });
+
+        describe('getCronEmitter', function() {
+            "use strict";
+            it('should return a valid cron emitter object', function() {
+                expect(meter.getCronEmitter()).to.instanceOf(cron.CronEmitter);
+            });
+        });
     });
+
 });

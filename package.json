@@ -1,7 +1,7 @@
 {
   "name": "power-meter-monitor",
   "main": "lib/main.js",
-  "version": "1.2.9",
+  "version": "1.3.0",
   "author": "Thomas Malt",
   "description": "Reading and logging an electrical power meter by connecting it to an arduino board",
   "repository": {
@@ -15,6 +15,7 @@
   ],
   "private": false,
   "dependencies": {
+    "cron-emitter": "^0.2.2",
     "forever": "^0.14.1",
     "q": "^1.1.1",
     "redis": "^0.12.1",
