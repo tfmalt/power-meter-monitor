@@ -1,0 +1,14 @@
+[Unit]
+Description=Power Meter Monitor Service
+After=network.target redis-server.service
+Requires=redis-server.service
+
+[Service]
+User=tm
+Group=tm
+Environment=NODE_ENV=production
+Restart=always
+ExecStart=/usr/local/bin/node /home/tm/src/tfmalt/power-meter-monitor/monitor.js
+
+[Install]
+WantedBy=multi-user.target
