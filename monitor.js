@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Startup script that bootstraps monitoring of my power meter talking
  * to an Ardunio Uno over a serial connection, storing the data in a redis
@@ -6,8 +7,10 @@
  * @author Thomas Malt <thomas@malt.no>
  * @copyright 2013-2015 (c) Thomas Malt <thomas@malt.no>
  */
+
 var config     = require('./config'),
-    Meter      = require('./lib/main').MinimalMeter,
+    argv       = require('minimist')(process.argv.slice(2)),
+    meter      = require('./lib/main'),
     logger     = require('winston'),
     VitalSigns = require('vitalsigns'),
     serialport = require('serialport'),
@@ -55,11 +58,11 @@ var setupVitals = function () {
 var setupLogger = function () {
     logger.remove(logger.transports.Console);
 
-    switch(process.env.POWER_ENV) {
+    switch(process.env.NODE_ENV) {
         case "development":
         case "integration":
         case "test":
-            console.log("Logging to: Console.\n");
+            console.log("Logging to: Console.");
             logger.add(logger.transports.Console, {
                 colorize: true,
                 timestamp: true
@@ -76,7 +79,6 @@ var setupLogger = function () {
             break;
     }
 };
-
 
 /**
  * Setup the serial port and connect events to functions in the power-meter object.
@@ -107,19 +109,21 @@ var setupSerialport = function (meter) {
 domain.on("error", function (err) {
     "use strict";
     logger.error("Got an error event stack trace:", err.message, err.stack);
+    console.log("Error:", err.message, err.stack, "- will exit.");
     process.exit(1);
 });
 
 process.on('SIGINT', function () {
     "use strict";
+    console.log("Got SIGINT. Told to exit. So bye.");
     logger.info("Got SIGINT. Told to exit. so bye.");
     process.exit(0);
 });
 
-
 domain.run(function () {
     "use strict";
-    console.log("Starting power-meter-monitor version " + config.version);
+    console.log("Starting power-meter-monitor version: " + config.version);
+    console.log("Node version: " + process.version);
 
     setupLogger();
     setupVitals();
@@ -130,11 +134,16 @@ domain.run(function () {
         config.redis.options
     );
 
-    var meter = new Meter(client);
+    var m = null;
 
-    setupSerialport(meter);
+    if (argv.meter === "raspberry") {
+        m = new meter.RaspberryMeter(client);
+    } else {
+        m = new meter.MinimalMeter(client);
+        setupSerialport(m);
+    }
 
-    meter.startMonitor();
+    m.startMonitor();
 
     logger.info(
         "Power meter monitoring v%s started in master script",

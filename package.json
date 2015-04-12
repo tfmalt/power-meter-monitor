@@ -17,6 +17,8 @@
   "dependencies": {
     "cron-emitter": "^0.2.2",
     "forever": "^0.14.1",
+    "minimist": "^1.1.1",
+    "onoff": "^1.0.2",
     "q": "^1.1.1",
     "redis": "^0.12.1",
     "serialport": "^1.4.6",
@@ -42,5 +44,8 @@
   },
   "scripts": {
     "test": "POWER_ENV=test istanbul cover _mocha -- -R spec"
+  },
+  "bin": {
+    "monitor": "./monitor.js"
   }
 }
