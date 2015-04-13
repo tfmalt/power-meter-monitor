@@ -7,8 +7,11 @@ Requires=redis-server.service
 User=tm
 Group=tm
 Environment=NODE_ENV=production
+Environment=REDIS_HOST=duro.malt.no
+Environment=REDIS_AUTH=g3yHBIdiGPBsoGgPdb6rkEJa
+Environment=POWER_METERTYPE=rpi
 Restart=always
-ExecStart=/usr/local/bin/node /home/tm/src/tfmalt/power-meter-monitor/monitor.js
+ExecStart=/usr/local/bin/monitor
 
 [Install]
 WantedBy=multi-user.target

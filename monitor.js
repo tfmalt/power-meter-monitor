@@ -17,6 +17,48 @@ var config     = require('./config'),
     redis      = require('redis'),
     domain     = require('domain').create();
 
+config.setup = function() {
+    this._overrideWithEnv();
+    this._overrideWithArgs();
+};
+
+config._overrideWithEnv = function() {
+    if (typeof process.env.REDIS_HOST === 'string') {
+        config.redis.host = process.env.REDIS_HOST;
+    }
+
+    if (typeof process.env.REDIS_PORT !== 'undefined') {
+        config.redis.port = process.env.REDIS_PORT;
+    }
+
+    if (typeof process.env.REDIS_AUTH === 'string') {
+        config.redis.options.auth_pass = process.env.REDIS_AUTH;
+    }
+
+    if (typeof process.env.POWER_METER_TYPE === 'string') {
+        config.meterType = process.env.POWER_METER_TYPE;
+    }
+
+};
+
+config._overrideWithArgs = function() {
+    if (typeof argv.meter === 'string' ) {
+        config.meterType = argv.meter;
+    }
+
+    if (typeof argv.redishost === 'string') {
+        config.redis.host = argv.redishost;
+    }
+
+    if (typeof argv.redisport !== 'undefined') {
+        config.redis.port = argv.redisport;
+    }
+
+    if (typeof argv.redisauth === 'string') {
+        config.redis.auth = argv.redisauth;
+    }
+};
+
 /**
  * Setup function for vitalsigns. Vital signs output statistics on server
  * performance to the logger at a given interval.
@@ -69,7 +111,7 @@ var setupLogger = function () {
             });
             break;
         default:
-            console.log("Logging to: ", config.logfile, "\n");
+            console.log("Logging to: ", config.logfile);
             logger.add(logger.transports.File, {
                 colorize:  true,
                 timestamp: true,
@@ -108,8 +150,9 @@ var setupSerialport = function (meter) {
 
 domain.on("error", function (err) {
     "use strict";
-    logger.error("Got an error event stack trace:", err.message, err.stack);
-    console.log("Error:", err.message, err.stack, "- will exit.");
+    logger.log("error", "Got an error event stack trace:", err.message, err.stack);
+    console.log("Error:", err.message, "- will exit.");
+    console.log(err.stack);
     process.exit(1);
 });
 
@@ -122,11 +165,19 @@ process.on('SIGINT', function () {
 
 domain.run(function () {
     "use strict";
-    console.log("Starting power-meter-monitor version: " + config.version);
-    console.log("Node version: " + process.version);
-
+    config.setup();
     setupLogger();
+
+    console.log("Starting power-meter-monitor version: " + config.version);
+    console.log("  Node version: " + process.version);
+
+    logger.info("Starting power-meter-monitor version: " + config.version);
+    logger.info("Node version: " + process.version);
+
     setupVitals();
+
+    console.log("  Redis host: " + config.redis.host + ":" + config.redis.port);
+    logger.info("Redis host: %s:%s", config.redis.host, config.redis.port);
 
     var client = redis.createClient(
         config.redis.port,
@@ -136,13 +187,25 @@ domain.run(function () {
 
     var m = null;
 
-    if (argv.meter === "raspberry") {
-        m = new meter.RaspberryMeter(client);
-    } else {
-        m = new meter.MinimalMeter(client);
-        setupSerialport(m);
+    console.log("  Power Meter Type:", config.meterType);
+    switch(config.meterType) {
+        case "raspberry":
+        case "rpi":
+            m = new meter.RaspberryMeter(client);
+            break;
+        case "verbose":
+            m = new meter.VerboseMeter(client);
+            setupSerialport(m);
+            break;
+        case "arduino":
+        case "minimal":
+        default:
+            m = new meter.MinimalMeter(client);
+            setupSerialport(m);
+            break;
     }
 
+    console.log("Power Meter Monitor started.");
     m.startMonitor();
 
     logger.info(
