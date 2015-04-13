@@ -8,56 +8,12 @@
  * @copyright 2013-2015 (c) Thomas Malt <thomas@malt.no>
  */
 
-var config     = require('./config'),
-    argv       = require('minimist')(process.argv.slice(2)),
-    meter      = require('./lib/main'),
+var config     = require('./lib/configParser'),
     logger     = require('winston'),
     VitalSigns = require('vitalsigns'),
     serialport = require('serialport'),
     redis      = require('redis'),
     domain     = require('domain').create();
-
-config.setup = function() {
-    this._overrideWithEnv();
-    this._overrideWithArgs();
-};
-
-config._overrideWithEnv = function() {
-    if (typeof process.env.REDIS_HOST === 'string') {
-        config.redis.host = process.env.REDIS_HOST;
-    }
-
-    if (typeof process.env.REDIS_PORT !== 'undefined') {
-        config.redis.port = process.env.REDIS_PORT;
-    }
-
-    if (typeof process.env.REDIS_AUTH === 'string') {
-        config.redis.options.auth_pass = process.env.REDIS_AUTH;
-    }
-
-    if (typeof process.env.POWER_METER_TYPE === 'string') {
-        config.meterType = process.env.POWER_METER_TYPE;
-    }
-
-};
-
-config._overrideWithArgs = function() {
-    if (typeof argv.meter === 'string' ) {
-        config.meterType = argv.meter;
-    }
-
-    if (typeof argv.redishost === 'string') {
-        config.redis.host = argv.redishost;
-    }
-
-    if (typeof argv.redisport !== 'undefined') {
-        config.redis.port = argv.redisport;
-    }
-
-    if (typeof argv.redisauth === 'string') {
-        config.redis.auth = argv.redisauth;
-    }
-};
 
 /**
  * Setup function for vitalsigns. Vital signs output statistics on server
@@ -148,11 +104,47 @@ var setupSerialport = function (meter) {
     });
 };
 
+var createMeter = function() {
+    "use strict";
+    var Meter = null;
+
+    switch(config.meterType) {
+        case "raspberry":
+        case "rpi":
+            Meter = require('./lib/raspberryMeter').RaspberryMeter;
+            break;
+        case "verbose":
+            Meter = require('./lib/verboseMeter').VerboseMeter;
+            break;
+        case "arduino":
+        case "minimal":
+            Meter = require('./lib/minimalMeter').MinimalMeter;
+            break;
+        default:
+            Meter = require('./lib/minimalMeter').MinimalMeter;
+            break;
+    }
+
+    var client = redis.createClient(
+        config.redis.port,
+        config.redis.host,
+        config.redis.options
+    );
+
+    var meter = new Meter(client);
+
+    if (config.meterType === "raspberry" || config.meterType === "rpi") {
+        return meter;
+    }
+
+    setupSerialport(meter);
+    return meter;
+};
+
 domain.on("error", function (err) {
     "use strict";
-    logger.log("error", "Got an error event stack trace:", err.message, err.stack);
+    logger.log("error", "Got an error event stack trace:", err.message);
     console.log("Error:", err.message, "- will exit.");
-    console.log(err.stack);
     process.exit(1);
 });
 
@@ -179,35 +171,12 @@ domain.run(function () {
     console.log("  Redis host: " + config.redis.host + ":" + config.redis.port);
     logger.info("Redis host: %s:%s", config.redis.host, config.redis.port);
 
-    var client = redis.createClient(
-        config.redis.port,
-        config.redis.host,
-        config.redis.options
-    );
-
-    var m = null;
-
     console.log("  Power Meter Type:", config.meterType);
-    switch(config.meterType) {
-        case "raspberry":
-        case "rpi":
-            m = new meter.RaspberryMeter(client);
-            break;
-        case "verbose":
-            m = new meter.VerboseMeter(client);
-            setupSerialport(m);
-            break;
-        case "arduino":
-        case "minimal":
-        default:
-            m = new meter.MinimalMeter(client);
-            setupSerialport(m);
-            break;
-    }
 
-    console.log("Power Meter Monitor started.");
+    var m = createMeter();
     m.startMonitor();
 
+    console.log("Power Meter Monitor started.");
     logger.info(
         "Power meter monitoring v%s started in master script",
         config.version
