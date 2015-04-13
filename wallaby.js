@@ -16,7 +16,7 @@ module.exports = function () {
             type: "node",
             runner: "/usr/local/bin/node",
             params: {
-                env: "POWER_ENV=test; TZ=Europe/Oslo; NODE_PATH=$NODE_PATH:/Users/tm/PhpstormProjects/power-meter-monitor"
+                env: "NODE_ENV=test; TZ=Europe/Oslo; NODE_PATH=$NODE_PATH:/Users/tm/PhpstormProjects/power-meter-monitor"
             }
         },
 

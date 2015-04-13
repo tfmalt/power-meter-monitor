@@ -43,7 +43,7 @@
     "npm": ">= 1.3.x"
   },
   "scripts": {
-    "test": "POWER_ENV=test istanbul cover _mocha -- -R spec"
+    "test": "NODE_ENV=test istanbul cover _mocha -- -R spec"
   },
   "bin": {
     "monitor": "./monitor.js"
