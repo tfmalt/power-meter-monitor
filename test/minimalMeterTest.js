@@ -4,18 +4,16 @@
  * @type {exports.expect}
  */
 
-console.log("directory: ", process.cwd());
-
-var chai        = require('chai'),
-    sinon       = require('sinon'),
-    chaipromise = require('chai-as-promised'),
-    expect      = chai.expect,
-    pm = require('../lib/main'),
-    serialport  = require('serialport'),
-    logger      = require('winston'),
-    fakeredis   = require('fakeredis'),
-    cron        = require('cron-emitter'),
-    config      = require('../config-test');
+var chai         = require('chai'),
+    sinon        = require('sinon'),
+    chaipromise  = require('chai-as-promised'),
+    expect       = chai.expect,
+    MinimalMeter = require('../lib/minimalMeter').MinimalMeter,
+    serialport   = require('serialport'),
+    logger       = require('winston'),
+    fakeredis    = require('fakeredis'),
+    cron         = require('cron-emitter'),
+    config       = require('../config-test');
 
 chai.use(chaipromise);
 
@@ -30,7 +28,7 @@ describe('Power Meter Monitor', function () {
     describe('MinimalMeter', function () {
         var meter;
         beforeEach(function (done) {
-            meter = new pm.MinimalMeter(fakeredis.createClient());
+            meter = new MinimalMeter(fakeredis.createClient());
             done();
         });
 
@@ -43,14 +41,14 @@ describe('Power Meter Monitor', function () {
         it('should throw TypeError when not passed a valid redis client', function () {
             "use strict";
             var testFn = function () {
-                new pm.MinimalMeter();
+                new MinimalMeter();
             };
 
             expect(testFn).to.throw(TypeError);
         });
 
         it('should be an Object', function () {
-            expect(meter).to.be.instanceOf(pm.MinimalMeter);
+            expect(meter).to.be.instanceOf(MinimalMeter);
         });
 
         it('should have correct initial values', function () {
