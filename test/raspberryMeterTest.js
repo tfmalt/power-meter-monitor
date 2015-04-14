@@ -121,6 +121,12 @@ describe('Power Meter Monitor', function() {
             });
         });
 
+        describe('updateMeterTotal', function() {
+            it('should complete without error', function() {
+                expect(m.updateMeterTotal()).to.be.undefined;
+            })
+        });
+
         after(function() {
             mockery.disable();
             mockery.deregisterAll();

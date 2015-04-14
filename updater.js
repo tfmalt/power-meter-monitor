@@ -26,15 +26,16 @@ var setupLogger = function () {
             console.log("Logging to: Console.");
             logger.add(logger.transports.Console, {
                 colorize: true,
-                timestamp: true
+                timestamp: true,
+                json: false
             });
             break;
         default:
-            console.log("Logging to: ", config.logfile);
+            console.log("Logging to: ", cfg.logfile);
             logger.add(logger.transports.File, {
                 colorize:  true,
                 timestamp: true,
-                filename: config.logfile,
+                filename: cfg.logfile,
                 json: false
             });
             break;
