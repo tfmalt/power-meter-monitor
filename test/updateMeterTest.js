@@ -12,6 +12,8 @@ var redis  = require('fakeredis');
 var update = require('../lib/updateMeter');
 var logger = require('winston');
 
+chai.use(require('chai-as-promised'));
+
 try {
     logger.remove(logger.transports.Console);
 }
@@ -121,6 +123,27 @@ describe('updateMeter', function() {
             update.clock.setHours(0);
             update.clock.setDate(update.clock.getDate() - update.clock.getDay());
             expect(update.isWeek()).to.be.true;
+        });
+    });
+
+    describe('handleMinute', function() {
+        before(function(done) {
+            update.setDbClient(redis.createClient());
+            update.db.rpush('seconds', JSON.stringify({
+                pulseCount: 13,
+                kWhs: 0.0013
+            }));
+            update.db.rpush('seconds', JSON.stringify({
+                pulseCount: 10,
+                kWhs: 0.0010
+            }));
+            done();
+        });
+
+        it('should return as promises', function() {
+            return expect(update.handleMinute()).to.eventually.have.all.keys([
+                "average", "count", "kwh", "max", "min", "time", "timestamp", "total"
+            ]);
         });
     });
 });
