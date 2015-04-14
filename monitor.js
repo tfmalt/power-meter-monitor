@@ -13,6 +13,7 @@ var config     = require('./lib/configParser'),
     VitalSigns = require('vitalsigns'),
     serialport = require('serialport'),
     redis      = require('redis'),
+    argv       = require('minimist')(process.argv.slice(2));
     domain     = require('domain').create();
 
 /**
@@ -141,6 +142,33 @@ var createMeter = function() {
     return meter;
 };
 
+printUsage = function() {
+    "use strict";
+    console.log("power-meter-monitor v" + config.version);
+    console.log("Usage:");
+    console.log("  -h, --help          Print help and usage information");
+    console.log("      --meter <type>  Type of meter to instantise");
+    console.log("  -v, --version       Print version of application and exit");
+};
+
+printVersion = function() {
+    "use strict";
+    console.log("v" + config.version);
+};
+
+checkArguments = function() {
+    "use strict";
+    if (argv.h === true || argv.help === true) {
+        printUsage();
+        process.exit();
+    }
+
+    if (argv.v === true || argv.version === true) {
+        printVersion();
+        process.exit();
+    }
+};
+
 domain.on("error", function (err) {
     "use strict";
     logger.log("error", "Got an error event stack trace:", err.message);
@@ -157,6 +185,7 @@ process.on('SIGINT', function () {
 
 domain.run(function () {
     "use strict";
+    checkArguments();
     config.setup();
     setupLogger();
 
