@@ -45,6 +45,7 @@
     "test": "NODE_ENV=test istanbul cover _mocha -- -R spec"
   },
   "bin": {
-    "monitor": "./monitor.js"
+    "power-meter-monitor": "./monitor.js",
+    "power-meter-updater": "./updater.js"
   }
 }

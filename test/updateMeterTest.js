@@ -40,11 +40,7 @@ describe('updateMeter', function() {
 
     describe('doEveryMinute', function() {
         it('should complete without error', function() {
-            expect(update.doEveryMinute(update)).to.be.undefined;
-        });
-
-        it('should throw error when called without argument', function() {
-            expect(update.doEveryMinute.bind(update, null)).to.throw(TypeError);
+            expect(update.doEveryMinute()).to.be.undefined;
         });
 
         it('should trigger every five minutes event', function(done) {
@@ -55,7 +51,7 @@ describe('updateMeter', function() {
                 done();
             };
             update.on('every_five_minutes', test);
-            update.doEveryMinute(update);
+            update.doEveryMinute();
             update.removeListener('every_five_minutes', test);
         });
 
@@ -68,7 +64,7 @@ describe('updateMeter', function() {
                 done();
             };
             update.on('every_half_hour', test);
-            update.doEveryMinute(update);
+            update.doEveryMinute();
             update.removeListener('every_half_hour', test);
         });
 
@@ -80,7 +76,7 @@ describe('updateMeter', function() {
                 done();
             };
             update.on('every_hour', test);
-            update.doEveryMinute(update);
+            update.doEveryMinute();
             update.removeListener('every_hour', test);
         });
 
@@ -92,7 +88,7 @@ describe('updateMeter', function() {
                 done();
             };
             update.on("every_six_hours", test);
-            update.doEveryMinute(update);
+            update.doEveryMinute();
             update.removeListener('every_six_hours', test);
         });
     });
@@ -121,6 +117,8 @@ describe('updateMeter', function() {
         });
 
         it('should return true', function() {
+            update.clock.setMinutes(0);
+            update.clock.setHours(0);
             update.clock.setDate(update.clock.getDate() - update.clock.getDay());
             expect(update.isWeek()).to.be.true;
         });
