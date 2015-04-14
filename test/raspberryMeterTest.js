@@ -122,9 +122,24 @@ describe('Power Meter Monitor', function() {
         });
 
         describe('updateMeterTotal', function() {
-            it('should complete without error', function() {
-                expect(m.updateMeterTotal()).to.be.undefined;
-            })
+            it('should throw error when called without argument', function() {
+                expect(m.updateMeterTotal).to.throw(TypeError);
+            });
+
+            it('should throw error when called with incorrect data', function() {
+                expect(m.updateMeterTotal.bind(m, {"foo": 1})).to.throw(TypeError);
+            });
+
+            it('should eventually return new value', function() {
+                return expect(m.updateMeterTotal({kWhs: 0.0016})).to.eventually.equal(0.0016);
+            });
+
+            it('should eventually return new value', function() {
+                return m.updateMeterTotal({kWhs: 0.0016}).then(function(value) {
+                    expect(value).to.equal(0.0016);
+                    return expect(m.updateMeterTotal({kWhs: 0.0008})).to.eventually.equal(0.0024);
+                });
+            });
         });
 
         after(function() {
