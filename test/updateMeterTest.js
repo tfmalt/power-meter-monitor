@@ -184,4 +184,73 @@ describe('updateMeter', function() {
            ]);
         });
     });
+
+    describe('_getMonthDays', function() {
+        it('it should return correct days for january', function () {
+            update.clock.setMonth(0);
+            expect(update._getMonthDays()).to.equal(31);
+        });
+
+        it('it should return correct days for February', function () {
+            update.clock.setMonth(1);
+            update.clock.setFullYear(2015);
+            expect(update._getMonthDays()).to.equal(28);
+        });
+
+        it('it should return correct days for March', function () {
+            update.clock.setMonth(2);
+            expect(update._getMonthDays()).to.equal(31);
+        });
+
+        it('it should return correct days for April', function () {
+            update.clock.setMonth(3);
+            expect(update._getMonthDays()).to.equal(30);
+        });
+
+        it('it should return correct days for May', function () {
+            update.clock.setMonth(4);
+            expect(update._getMonthDays()).to.equal(31);
+        });
+
+        it('it should return correct days for June', function () {
+            update.clock.setMonth(5);
+            expect(update._getMonthDays()).to.equal(30);
+        });
+
+        it('it should return correct days for July', function () {
+            update.clock.setMonth(6);
+            expect(update._getMonthDays()).to.equal(31);
+        });
+
+        it('it should return correct days for August', function () {
+            update.clock.setMonth(7);
+            expect(update._getMonthDays()).to.equal(31);
+        });
+
+        it('it should return correct days for September', function () {
+            update.clock.setMonth(8);
+            expect(update._getMonthDays()).to.equal(30);
+        });
+
+        it('it should return correct days for October', function () {
+            update.clock.setMonth(9);
+            expect(update._getMonthDays()).to.equal(31);
+        });
+
+        it('it should return correct days for November', function () {
+            update.clock.setMonth(10);
+            expect(update._getMonthDays()).to.equal(30);
+        });
+
+        it('it should return correct days for December', function () {
+            update.clock.setMonth(11);
+            expect(update._getMonthDays()).to.equal(31);
+        });
+
+        it('it should return correct days for Feb in leap years', function () {
+            update.clock.setMonth(1);
+            update.clock.setFullYear(2016);
+            expect(update._getMonthDays()).to.equal(29);
+        });
+    });
 });
