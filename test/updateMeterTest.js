@@ -128,7 +128,7 @@ describe('updateMeter', function() {
 
     describe('handleMinute', function() {
         before(function(done) {
-            update.setDbClient(redis.createClient());
+            update.setDbClient(redis.createClient("foo"));
             update.db.rpush('seconds', JSON.stringify({
                 pulseCount: 13,
                 kWhs: 0.0013
@@ -143,6 +143,29 @@ describe('updateMeter', function() {
         it('should return as promises', function() {
             return expect(update.handleMinute()).to.eventually.have.all.keys([
                 "average", "watts", "count", "kwh", "max", "min", "time", "timestamp", "total"
+            ]);
+        });
+    });
+
+    describe('handleFiveMinutes', function() {
+        before(function(done) {
+            update.setDbClient(redis.createClient("bar"));
+            update.db.rpush('minutes', JSON.stringify({
+                count: 318
+            }));
+            update.db.rpush('minutes', JSON.stringify({
+                count: 300
+            }));
+            done();
+        });
+
+        it('should calculate total as promised', function() {
+            return expect(update.handleFiveMinutes()).to.eventually.have.property("total", 618);
+        });
+
+        it('should return data as promised', function() {
+            return expect(update.handleFiveMinutes()).to.eventually.have.all.keys([
+                "perMinute", "time", "timestamp", "total", "kwh"
             ]);
         });
     });
