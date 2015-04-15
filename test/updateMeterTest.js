@@ -142,7 +142,7 @@ describe('updateMeter', function() {
 
         it('should return as promises', function() {
             return expect(update.handleMinute()).to.eventually.have.all.keys([
-                "average", "count", "kwh", "max", "min", "time", "timestamp", "total"
+                "average", "watts", "count", "kwh", "max", "min", "time", "timestamp", "total"
             ]);
         });
     });
