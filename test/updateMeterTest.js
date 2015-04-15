@@ -151,10 +151,12 @@ describe('updateMeter', function() {
         before(function(done) {
             update.setDbClient(redis.createClient("bar"));
             update.db.rpush('minutes', JSON.stringify({
-                count: 318
+                count: 318,
+                total: 318
             }));
             update.db.rpush('minutes', JSON.stringify({
-                count: 300
+                count: 300,
+                total: 300
             }));
             done();
         });
@@ -167,6 +169,19 @@ describe('updateMeter', function() {
             return expect(update.handleFiveMinutes()).to.eventually.have.all.keys([
                 "perMinute", "time", "timestamp", "total", "kwh"
             ]);
+        });
+    });
+
+    describe('_getRangeFromDb', function() {
+        before(function(done) {
+            update.setDbClient(redis.createClient("baz"));
+            done();
+        });
+
+        it('should return data as promised', function() {
+           return expect(update._getRangeFromDb('minutes', 5)).to.eventually.have.all.keys([
+               "kwh", "perMinute", "time", "timestamp", "total"
+           ]);
         });
     });
 });
