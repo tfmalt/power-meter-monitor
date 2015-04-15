@@ -1,0 +1,16 @@
+[Unit]
+Description=Power Meter Updater Service
+After=network.target redis-server.service
+Requires=redis-server.service
+
+[Service]
+User=tm
+Group=tm
+Environment=NODE_ENV=production
+Environment=REDIS_HOST=localhost
+Environment=REDIS_AUTH=
+Restart=always
+ExecStart=/usr/local/bin/power-meter-updater
+
+[Install]
+WantedBy=multi-user.target
