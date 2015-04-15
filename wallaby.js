@@ -2,9 +2,10 @@ module.exports = function () {
     console.log(process.cwd());
     return {
         files: [
-            "config-test.js",
             "package.json",
+            "config-test.js",
             "monitor.js",
+            "updater.js",
             "lib/*.js"
         ],
 
