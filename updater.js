@@ -4,8 +4,9 @@
  * Script for doing updates to the database at regular intervals
  *
  * @author Thomas Malt <thomas@malt.no>
- * @copyright 2015 (c) tm
+ * @copyright 2013-2015 (c) Thomas Malt
  */
+
 var cfg     = require('./lib/configParser');
 var updater = require('./lib/updateMeter');
 var domain  = require('domain').create();

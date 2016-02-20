@@ -5,9 +5,9 @@
 
 ## Power Meter Monitor
 
-This is a hobby project consisting of an Arduino Uno reading the flashing led from my power meter to monitor my power meter consumption.
+This is a hobby project consisting of an Arduino Uno reading the flashing led from my power meter to monitor my power meter consumption. The backend has also been rewritten in node.js to run on a raspberry pi. Code for both arduino and raspberry pi is available in the repository.
 
-A daemon written in node.js reads data from the arduino over the serial connection and stores the data in a Redis database. Currently the redis instance connected to the daemon is configured as master and syncronises with a redis slave in AWS EC2 as data backend to the REST API backend feeding the dashboard apps with data. 
+A daemon written in node.js reads data from the arduino, or raspberry pi, over the serial connection and stores the data in a Redis database. Currently the redis instance connected to the daemon is configured as master and syncronises with a redis slave in AWS EC2 as data backend to the REST API backend feeding the dashboard apps with data. 
 
 * See: [power-meter-ionic](https://github.com/tfmalt/power-meter-ionic) for information about the ionic mobile app dashboard.
 * See: [power-meter-api](https://github.com/tfmalt/power-meter-api) For the
