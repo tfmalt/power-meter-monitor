@@ -1,8 +1,9 @@
 {
   "name": "power-meter-monitor",
   "main": "lib/main.js",
-  "version": "2.1.6",
+  "version": "2.2.0",
   "author": "Thomas Malt",
+  "license": "MIT",
   "description": "Reading and logging an electrical power meter by connecting it to an arduino board",
   "repository": {
     "url": "http://github.com/tfmalt/power-meter-monitor"
@@ -19,27 +20,25 @@
     "minimist": "^1.1.1",
     "onoff": "^1.0.2",
     "q": "^1.1.1",
-    "redis": "^0.12.1",
-    "serialport": "^1.4.6",
-    "underscore": "^1.7.0",
+    "redis": "^2.4.x",
+    "serialport": "^2.0.x",
+    "underscore": "^1.8.x",
     "vitalsigns": "^0.4.3",
-    "winston": "^0.9.0"
+    "winston": "^2.1.x"
   },
   "devDependencies": {
-    "chai": "^2.1.1",
-    "chai-as-promised": "^4.3.0",
-    "codeclimate-test-reporter": "0.0.4",
-    "fakeredis": "^0.3.0",
-    "grunt": ">= 0.4.0",
-    "grunt-mocha-test": ">= 0.7.0",
-    "istanbul": "^0.3.7",
-    "mocha": "^2.2.0",
+    "chai": "^3.5.x",
+    "chai-as-promised": "^5.2.x",
+    "codeclimate-test-reporter": "0.3.x",
+    "fakeredis": "^1.0.x",
+    "istanbul": "^0.4.x",
+    "mocha": "^2.4.x",
     "mockery": "^1.4.0",
-    "sinon": "^1.13.0"
+    "sinon": "^1.17.x"
   },
   "engines": {
-    "node": ">= 0.10.x",
-    "npm": ">= 1.3.x"
+    "node": ">= 5.6.x",
+    "npm": ">= 3.6.x"
   },
   "scripts": {
     "test": "NODE_ENV=test istanbul cover _mocha -- -R spec",
