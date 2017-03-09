@@ -21,10 +21,10 @@
     "onoff": "^1.0.2",
     "q": "^1.1.1",
     "redis": "^2.4.x",
-    "serialport": "^2.0.x",
+    "serialport": "^4.0.x",
     "underscore": "^1.8.x",
     "vitalsigns": "^0.4.3",
-    "winston": "^2.1.x"
+    "winston": "^2.x"
   },
   "devDependencies": {
     "chai": "^3.5.x",
@@ -37,7 +37,7 @@
     "sinon": "^1.17.x"
   },
   "engines": {
-    "node": ">= 5.6.x",
+    "node": ">= 6.x",
     "npm": ">= 3.6.x"
   },
   "scripts": {
