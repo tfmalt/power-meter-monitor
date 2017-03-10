@@ -12,7 +12,6 @@
 const config = require('./lib/configParser');
 const logger = require('winston');
 const VitalSigns = require('vitalsigns');
-const serialport = require('serialport');
 const redis = require('redis');
 const argv = require('minimist')(process.argv.slice(2));
 const domain = require('domain').create();
