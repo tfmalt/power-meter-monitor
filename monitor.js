@@ -9,12 +9,13 @@
  * @copyright 2013-2017 (c) Thomas Malt <thomas@malt.no>
  */
 
-const config = require('./lib/configParser');
-const logger = require('winston');
+const config     = require('./lib/configParser');
+const logger     = require('winston');
+const Prom       = require('bluebird');
 const VitalSigns = require('vitalsigns');
-const redis = require('redis');
-const argv = require('minimist')(process.argv.slice(2));
-const domain = require('domain').create();
+const redis      = Prom.promisifyAll(require('redis'));
+const argv       = require('minimist')(process.argv.slice(2));
+const domain     = require('domain').create();
 
 /**
  * Setup function for vitalsigns. Vital signs output statistics on server
@@ -23,7 +24,7 @@ const domain = require('domain').create();
 const setupVitals = () => {
   logger.info("Setting up health check with VitalSigns.");
 
-  var vitals = new VitalSigns({autoCheck: 30000});
+  const vitals = new VitalSigns({autoCheck: 30000});
 
   vitals.monitor('cpu', {});
   vitals.monitor('mem', {units: 'MB'});
