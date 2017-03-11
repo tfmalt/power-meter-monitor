@@ -1,7 +1,0 @@
-.idea
-coverage
-node_modules
-wallaby.js
-config-private.js
-.eslintrc.json
-.gitignore
