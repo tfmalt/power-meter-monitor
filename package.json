@@ -16,6 +16,7 @@
   ],
   "private": false,
   "dependencies": {
+    "bluebird": "^3.5.0",
     "cron-emitter": "^0.2.2",
     "minimist": "^1.1.1",
     "onoff": "^1.1.2",
