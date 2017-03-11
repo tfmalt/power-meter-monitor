@@ -20,9 +20,11 @@ const domain     = require('domain').create();
 /**
  * Setup function for vitalsigns. Vital signs output statistics on server
  * performance to the logger at a given interval.
+ *
+ * @returns {undefined}
  */
 const setupVitals = () => {
-  logger.info("Setting up health check with VitalSigns.");
+  logger.info('Setting up health check with VitalSigns.');
 
   const vitals = new VitalSigns({autoCheck: 30000});
 
@@ -30,16 +32,16 @@ const setupVitals = () => {
   vitals.monitor('mem', {units: 'MB'});
   vitals.monitor('tick', {});
 
-  vitals.on('healthChange', function(healthy, report, failed) {
-    logger.warn("Health Change: server is: %s\nReport: %s\nFailed: %s", (healthy
+  vitals.on('healthChange', (healthy, report, failed) => {
+    logger.warn('Health Change: server is: %s\nReport: %s\nFailed: %s', (healthy
       ? 'healthy'
       : 'unhealthy'), report, failed);
   });
 
-  vitals.on('healthCheck', function(healthy, report, failed) {
-    var type = healthy ? 'info' : 'warn';
+  vitals.on('healthCheck', (healthy, report, failed) => {
+    let type = healthy ? 'info' : 'warn';
 
-    logger.log(type, "Health Check");
+    logger.log(type, 'Health Check');
     logger.log(type, '  healthy:', healthy);
     logger.log(type, '  report:', JSON.stringify(report));
 
@@ -52,46 +54,47 @@ const setupVitals = () => {
 /**
  * Configure the logger properly. Different behaviour is added depending
  * if the logger is run in production or development.
+ *
+ * @returns {undefined}
  */
-const setupLogger = () => {
+function setupLogger() {
   logger.remove(logger.transports.Console);
 
   switch (process.env.NODE_ENV) {
-    case "development":
-    case "integration":
-    case "test":
-      console.log("Logging to: Console.");
+    case 'development':
+    case 'integration':
+    case 'test':
+      console.log('Logging to: Console.');
       logger.add(logger.transports.Console, {
-        colorize: true,
+        colorize:  true,
         timestamp: true
       });
       break;
     default:
-      console.log("Logging to: ", config.logfile);
+      console.log('Logging to: ', config.logfile);
       logger.add(logger.transports.File, {
-        colorize: true,
+        colorize:  true,
         timestamp: true,
-        filename: config.logfile,
-        json: false
+        filename:  config.logfile,
+        json:      false
       });
       break;
   }
-};
+}
 
-var createMeter = function() {
-  "use strict";
-  var Meter = null;
+function createMeter() {
+  let Meter = null;
 
   switch (config.meterType) {
-    case "raspberry":
-    case "rpi":
+    case 'raspberry':
+    case 'rpi':
       Meter = require('./lib/raspberryMeter').RaspberryMeter;
       break;
-    case "verbose":
+    case 'verbose':
       Meter = require('./lib/verboseMeter').VerboseMeter;
       break;
-    case "arduino":
-    case "minimal":
+    case 'arduino':
+    case 'minimal':
       Meter = require('./lib/minimalMeter').MinimalMeter;
       break;
     default:
@@ -101,24 +104,22 @@ var createMeter = function() {
 
   const client = redis.createClient(config.redis.port, config.redis.host, config.redis.options);
   return new Meter(client);
-};
+}
 
-printUsage = function() {
-  "use strict";
-  console.log("power-meter-monitor v" + config.version);
-  console.log("Usage:");
-  console.log("  -h, --help          Print help and usage information");
-  console.log("      --meter <type>  Type of meter to instantise");
-  console.log("  -v, --version       Print version of application and exit");
-};
+function printUsage() {
+  'use strict';
+  console.log('power-meter-monitor v' + config.version);
+  console.log('Usage:');
+  console.log('  -h, --help          Print help and usage information');
+  console.log('      --meter <type>  Type of meter to instantise');
+  console.log('  -v, --version       Print version of application and exit');
+}
 
-printVersion = function() {
-  "use strict";
-  console.log("v" + config.version);
-};
+function printVersion() {
+  console.log('v' + config.version);
+}
 
-checkArguments = function() {
-  "use strict";
+function checkArguments() {
   if (argv.h === true || argv.help === true) {
     printUsage();
     process.exit();
@@ -128,46 +129,44 @@ checkArguments = function() {
     printVersion();
     process.exit();
   }
-};
+}
 
-domain.on("error", function(err) {
-  "use strict";
-  logger.log("error", "Got an error event stack trace:", err.message);
-  console.log("Error:", err.message, "- will exit.");
+domain.on('error', (err) => {
+  logger.log('error', 'Got an error event stack trace:', err.message);
+  console.log('Error:', err.message, '- will exit.');
   process.exit(1);
 });
 
-process.on('SIGINT', function() {
-  "use strict";
-  console.log("Got SIGINT. Told to exit. So bye.");
-  logger.info("Got SIGINT. Told to exit. so bye.");
+process.on('SIGINT', () => {
+  console.log('Got SIGINT. Told to exit. So bye.');
+  logger.info('Got SIGINT. Told to exit. so bye.');
+
   process.exit(0);
 });
 
-domain.run(function() {
-  "use strict";
+domain.run(() => {
   checkArguments();
   config.setup();
   setupLogger();
 
-  console.log("Starting power-meter-monitor version: " + config.version);
-  console.log("  Node version: " + process.version);
+  console.log('Starting power-meter-monitor version: ' + config.version);
+  console.log('  Node version: ' + process.version);
 
-  logger.info("Starting power-meter-monitor version: " + config.version);
-  logger.info("Node version: " + process.version);
+  logger.info('Starting power-meter-monitor version: ' + config.version);
+  logger.info('Node version: ' + process.version);
 
   setupVitals();
 
-  console.log("  Redis host: " + config.redis.host + ":" + config.redis.port);
-  logger.info("Redis host: %s:%s", config.redis.host, config.redis.port);
+  console.log('  Redis host: ' + config.redis.host + ':' + config.redis.port);
+  logger.info('Redis host: %s:%s', config.redis.host, config.redis.port);
 
-  console.log("  Power Meter Type:", config.meterType);
+  console.log('  Power Meter Type:', config.meterType);
 
-  var m = createMeter();
+  const m = createMeter();
   m.startMonitor();
 
-  console.log("Power Meter Monitor started.");
-  logger.info("Power meter monitoring v%s started in master script", config.version);
+  console.log('Power Meter Monitor started.');
+  logger.info('Power meter monitoring v%s started in master script', config.version);
 });
 
 /*
