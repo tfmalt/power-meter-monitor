@@ -23,7 +23,7 @@ const domain     = require('domain').create();
  *
  * @returns {undefined}
  */
-const setupVitals = () => {
+function setupVitals() {
   logger.info('Setting up health check with VitalSigns.');
 
   const vitals = new VitalSigns({autoCheck: 30000});
@@ -49,7 +49,7 @@ const setupVitals = () => {
       logger.log(type, '  failed:', failed);
     }
   });
-};
+}
 
 /**
  * Configure the logger properly. Different behaviour is added depending
