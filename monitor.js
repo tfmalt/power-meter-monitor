@@ -17,7 +17,7 @@ const mc     = require('./lib/monitorController');
 const config = new Config();
 const logger = mc.setupLogger(config);
 
-console.log('config', config.config);
+console.log('config', config);
 
 process.exit(0);
 prom.promisifyAll(require('redis'));
