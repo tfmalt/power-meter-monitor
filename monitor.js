@@ -2,63 +2,43 @@
 
 /**
  * Startup script that bootstraps monitoring of my power meter talking
- * to an Ardunio Uno over a serial connection, storing the data in a redis
- * database for later consumption.
+ * to a RaspberryPi, storing the data in a redis database.
  *
  * @author Thomas Malt <thomas@malt.no>
  * @copyright 2013-2017 (c) Thomas Malt <thomas@malt.no>
  */
 
-const Config = require('./lib/configParser');
-const logger = require('winston');
-const Meter = require('./lib/RaspberryMeter');
-const Prom = require('bluebird');
-const redis = Prom.promisifyAll(require('redis'));
-const argv = require('minimist')(process.argv.slice(2));
+const prom   = require('bluebird');
+const redis  = require('redis');
+const Config = require('./lib/ConfigParser');
+const Meter  = require('./lib/RaspberryMeter');
+const mc     = require('./lib/monitorController');
 
-function createMeter(config) {
-  let Meter = null;
+const config = new Config();
+const logger = mc.setupLogger(config);
 
-  switch (config.meterType) {
-    case 'raspberry':
-    case 'rpi':
-      break;
-    case 'verbose':
-      Meter = require('./lib/verboseMeter').VerboseMeter;
-      break;
-    case 'arduino':
-    case 'minimal':
-      Meter = require('./lib/minimalMeter').MinimalMeter;
-      break;
-    default:
-      Meter = require('./lib/minimalMeter').MinimalMeter;
-      break;
-  }
+console.log('config', config.config);
 
-  const client = redis.createClient(config.redis.port, config.redis.host, config.redis.options);
-  return new Meter(client);
-}
-
-
-let config = new Config();
-checkArguments(config);
-setupLogger(config);
+process.exit(0);
+prom.promisifyAll(require('redis'));
+mc.checkArguments(config);
 
 console.log('Starting power-meter-monitor version: ' + config.version);
 console.log('  Node version: ' + process.version);
-
 logger.info('Starting power-meter-monitor version: ' + config.version);
 logger.info('Node version: ' + process.version);
 
-setupVitals();
+mc.setupVitals();
 
 console.log('  Redis host: ' + config.redis.host + ':' + config.redis.port);
 logger.info('Redis host: %s:%s', config.redis.host, config.redis.port);
 
 console.log('  Power Meter Type:', config.meterType);
 
-const m = createMeter(config);
-m.startMonitor();
+const client = redis.createClient(config.redis);
+const meter = new Meter(client);
+
+meter.startMonitor();
 
 console.log('Power Meter Monitor started.');
 logger.info('Power meter monitoring v%s started in master script', config.version);
