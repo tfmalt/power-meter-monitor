@@ -16,9 +16,9 @@
   ],
   "private": false,
   "dependencies": {
+    "args": "^2.3.0",
     "bluebird": "^3.5.0",
     "cron-emitter": "^0.2.2",
-    "minimist": "^1.1.1",
     "onoff": "^1.1.2",
     "redis": "^2.7.0",
     "vitalsigns": "^0.4.3",
