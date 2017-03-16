@@ -18,7 +18,6 @@ const config = new Config();
 const logger = mc.setupLogger(config);
 
 prom.promisifyAll(redis);
-mc.checkArguments(config);
 mc.setupVitals();
 
 console.log('Starting power-meter-monitor version: ' + config.version);
