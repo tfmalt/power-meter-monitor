@@ -17,23 +17,17 @@ const mc     = require('./lib/monitorController');
 const config = new Config();
 const logger = mc.setupLogger(config);
 
-console.log('config', config);
-
-process.exit(0);
-prom.promisifyAll(require('redis'));
+prom.promisifyAll(redis);
 mc.checkArguments(config);
+mc.setupVitals();
 
 console.log('Starting power-meter-monitor version: ' + config.version);
 console.log('  Node version: ' + process.version);
+console.log('  Redis host: ' + config.redis.host + ':' + config.redis.port);
+console.log('  Power Meter Type:', config.meterType);
 logger.info('Starting power-meter-monitor version: ' + config.version);
 logger.info('Node version: ' + process.version);
-
-mc.setupVitals();
-
-console.log('  Redis host: ' + config.redis.host + ':' + config.redis.port);
 logger.info('Redis host: %s:%s', config.redis.host, config.redis.port);
-
-console.log('  Power Meter Type:', config.meterType);
 
 const client = redis.createClient(config.redis);
 const meter = new Meter(client);
