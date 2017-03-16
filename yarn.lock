@@ -775,15 +775,7 @@ redis-parser@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/redis-parser/-/redis-parser-2.5.0.tgz#79fc2b1d4a6e4d2870b35368433639271fca2617"
 
-redis@2.6.0-0:
-  version "2.6.0-0"
-  resolved "https://registry.yarnpkg.com/redis/-/redis-2.6.0-0.tgz#73f674dd3e54a3a76703d1ed2606b4e600be076d"
-  dependencies:
-    double-ended-queue "^2.1.0-0"
-    redis-commands "^1.1.0"
-    redis-parser "^1.2.0"
-
-redis@^2.6.5:
+redis@^2.7.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/redis/-/redis-2.7.0.tgz#e5b6ae2e097ce74a9b898e0a68212156ae2d4fa9"
   dependencies:

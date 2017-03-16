@@ -1,0 +1,11 @@
+{
+  "logfile": "/var/log/power-meter/monitor.log",
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "options": {
+      "auth_pass": null
+    }
+  },
+  "meterType": "rpi"
+}
