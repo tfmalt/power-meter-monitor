@@ -6,146 +6,114 @@
  * @copyright 2015 (c) tm
  */
 
-var chai    = require('chai');
-var promise = require('chai-as-promised');
-var expect  = chai.expect;
-var mockery = require('mockery');
-var redis   = require('fakeredis');
-var logger  = require('winston');
+const chai = require('chai');
+const promise = require('chai-as-promised');
+const bluebird = require('bluebird');
+const expect = chai.expect;
+const mockery = require('mockery');
+const redis = require('fakeredis');
+const logger = require('winston');
 
 chai.use(promise);
+bluebird.promisifyAll(redis);
 
 try {
-    logger.remove(logger.transports.Console);
-}
-catch (e) {
-    // ignore
-}
-
-var mock_onoff = {
-    Gpio: function(number, direction, edge) {
-        "use strict";
-        // return 'mocked gpio';
-        this.watch = function(callback) {
-            return true;
-        };
-
-        this.writeSync = function(value) {
-            return true;
-        };
-
-    }
+  logger.remove(logger.transports.Console);
+} catch (e) {
+  // ignore
 }
 
-describe('Power Meter Monitor', function() {
-    "use strict";
-    describe('RaspberryMeter', function() {
-        var RaspberryMeter = null;
-        var m = null;
-        before(function() {
-            mockery.registerAllowable('../lib/raspberryMeter');
-            mockery.registerMock('onoff', mock_onoff);
-            mockery.enable({
-                useCleanCache: true,
-                warnOnUnregistered: false
-            });
+const mock_onoff = {
+  Gpio: function (number, direction, ok) {
+    // return 'mocked gpio';
+    this.ok = ok;
+    this.watch     = () => true;
+    this.writeSync = () => true;
+  }
+};
 
-            var rpm = require('../lib/raspberryMeter');
-            RaspberryMeter = rpm.RaspberryMeter;
-        });
+describe('Power Meter Monitor', () => {
+  describe('RaspberryMeter', () => {
+    let RaspberryMeter = null;
+    let m = null;
 
-        beforeEach(function(done) {
-            m = new RaspberryMeter(redis.createClient());
-            done();
-        });
+    before(() => {
+      mockery.registerAllowable('../lib/RaspberryMeter');
+      mockery.registerMock('onoff', mock_onoff);
+      mockery.enable({useCleanCache: true, warnOnUnregistered: false});
 
-        it('Should create new object', function() {
-            var rpi = new RaspberryMeter(redis.createClient());
-            expect(rpi).to.be.instanceOf(RaspberryMeter);
-        });
-
-        describe('startMonitor', function() {
-            it('should finish without error', function() {
-                expect(m.startMonitor()).to.be.undefined;
-            });
-        });
-
-        describe('doEverySecond', function() {
-            it('should run timeout as expected', function(done) {
-                m.doEverySecond(m);
-                done();
-            });
-        });
-
-        describe('_verifyLimit', function() {
-            it('should return false', function() {
-                return expect(m._verifyLimit()).to.eventually.equal(false);
-            });
-
-            it('should return true', function() {
-                for (var i = 0; i < 5000; i++) {
-                    m.db.rpush("seconds", "foo: " + i);
-                }
-
-                return expect(m._verifyLimit()).to.eventually.equal(true);
-            });
-        });
-
-        describe('_handleSensorInterrupt', function() {
-            it('should throw error when error', function() {
-                expect(m._handleSensorInterrupt.bind(m, new Error())).to.throw(Error);
-            });
-
-            it('should complete without error', function() {
-                RaspberryMeter.self = m;
-                expect(m._handleSensorInterrupt(null, 1)).to.be.undefined;
-            });
-
-            it('should complete without error', function() {
-                expect(m._handleSensorInterrupt(null, 1)).to.be.undefined;
-            });
-
-            it('should complete without error', function() {
-                m = new RaspberryMeter();
-                RaspberryMeter.self = m;
-                expect(m._handleSensorInterrupt(null, 1)).to.be.undefined;
-            });
-        });
-
-        describe('_getPulseLength', function() {
-            it('should return an integer', function(done) {
-                setTimeout(function() {
-                    expect(m._getPulseLength()).to.be.above(9);
-                    done();
-                }, 10);
-            });
-        });
-
-        describe('updateMeterTotal', function() {
-            it('should throw error when called without argument', function() {
-                expect(m.updateMeterTotal).to.throw(TypeError);
-            });
-
-            it('should throw error when called with incorrect data', function() {
-                expect(m.updateMeterTotal.bind(m, {"foo": 1})).to.throw(TypeError);
-            });
-
-            it('should eventually return new value', function() {
-                return expect(m.updateMeterTotal({kWhs: 0.0016})).to.eventually.equal(0.0016);
-            });
-
-            it('should eventually return new value', function() {
-                return m.updateMeterTotal({kWhs: 0.0016}).then(function(value) {
-                    expect(value).to.equal(0.0016);
-                    return expect(m.updateMeterTotal({kWhs: 0.0008})).to.eventually.equal(0.0024);
-                });
-            });
-        });
-
-        after(function() {
-            mockery.disable();
-            mockery.deregisterAll();
-        })
-
+      RaspberryMeter = require('../lib/RaspberryMeter');
     });
+
+    beforeEach((done) => {
+      m = new RaspberryMeter(redis.createClient(), logger);
+      done();
+    });
+
+    it('Should create new object', () => {
+      const rpi = new RaspberryMeter(redis.createClient());
+      expect(rpi).to.be.instanceOf(RaspberryMeter);
+    });
+
+    describe('startMonitor', () => {
+      it('should finish without error', () => {
+        expect(m.startMonitor()).to.be.undefined;
+      });
+    });
+
+    describe('doEverySecond', () => {
+      it('should run timeout as expected', (done) =>  {
+        m.doEverySecond(m);
+        done();
+      });
+    });
+
+    describe('verifyLimit', () => {
+      it('should return false', () => {
+        return expect(m.verifyLimit()).to.eventually.equal(false);
+      });
+    });
+
+    describe('handleSensorInterrupt', () => {
+      it('should throw error when error', () => {
+        expect(m.handleSensorInterrupt.bind(m, new Error())).to.throw(Error);
+      });
+
+      it('should complete without error', () => {
+        expect(m.handleSensorInterrupt(null, 1)).to.be.false;
+      });
+
+      it('should complete without error', () => {
+        expect(m.handleSensorInterrupt(null, 1)).to.be.false;
+      });
+
+      it('should complete without error', () => {
+        expect(m.handleSensorInterrupt(null, 1)).to.be.false;
+      });
+    });
+
+    describe('getPulseLength', () => {
+      it('should return an integer', (done) => {
+        setTimeout( () => {
+          expect(m.getPulseLength()).to.be.above(9);
+          done();
+        }, 10);
+      });
+    });
+
+    describe('updateMeterTotal', () => {
+      it('should throw error when called without argument', () => {
+        expect(m.updateMeterTotal).to.throw(TypeError);
+      });
+
+      it('should throw error when called with incorrect data', () => {
+        expect(m.updateMeterTotal.bind(m, {"foo": 1})).to.throw(TypeError);
+      });
+    });
+
+    after( () => {
+      mockery.disable();
+      mockery.deregisterAll();
+    });
+  });
 });
