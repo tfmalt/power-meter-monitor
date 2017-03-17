@@ -22,7 +22,7 @@ mc.printStartupMessage(config)
 mc.setupVitals();
 
 const client = redis.createClient(config.redis);
-const meter = new Meter(client);
+const meter = new Meter(client, logger);
 
 meter.startMonitor();
 
