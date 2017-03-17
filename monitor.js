@@ -22,26 +22,28 @@ bluebird.promisifyAll(redis.Multi.prototype);
 mc.printStartupMessage(config)
 mc.setupVitals();
 
-bluebird.try(() => {
-  try {
-    return redis.createClient(config.redis);
-  } catch (error) {
-    throw error;
-  }
-})
-  .then((client) => new Meter(client, logger))
-  .then((meter) => meter.startMonitor())
-  .then(() => console.log('Power Meter Monitor started.'))
-  .then(() => (logger.info(
-    `Power meter monitoring v${config.version} started in master script`
-    )
-  ))
-  .catch(error => {
-    console.log('got error:', error.message);
-    console.log(error);
-    logger.error('error.message');
-    process.exit(1);
-  });
+
+try {
+  const client = redis.createClient(config.redis);
+  bluebird.resolve(client)
+    .then((c) => new Meter(c, logger))
+    .then((meter) => meter.startMonitor())
+    .then(() => console.log('Power Meter Monitor started.'))
+    .then(() => (logger.info(
+        `Power meter monitoring v${config.version} started in master script`
+      )
+    ))
+    .catch(error => {
+      console.log('got error:', error.message);
+      logger.error('error.message');
+      process.exit(1);
+    });
+} catch (error) {
+  console.log('got error:', error.message);
+  console.log(error);
+  logger.error('error.message');
+  process.exit(1);
+}
 
 /*
  * MIT LICENSE
