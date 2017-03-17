@@ -22,8 +22,8 @@ mc.printStartupMessage(config)
 mc.setupVitals();
 
 redis.createClientAsync(config.redis)
-  .then(client => new Meter(client, logger))
-  .then(meter => meter.startMonitor())
+  .then((client) => new Meter(client, logger))
+  .then((meter) => meter.startMonitor())
   .then(() => console.log('Power Meter Monitor started.'))
   .then(() => (logger.info(
     `Power meter monitoring v${config.version} started in master script`
@@ -31,6 +31,7 @@ redis.createClientAsync(config.redis)
   ))
   .catch(error => {
     console.log('got error:', error.message);
+    console.log(error);
     logger.error('error.message');
     process.exit(1);
   });
