@@ -16,12 +16,13 @@ const mc       = require('./lib/monitorController');
 const config = new Config();
 const logger = mc.setupLogger(config);
 
-bluebird.promisifyAll(redis);
+bluebird.promisifyAll(redis.RedisClient.prototype);
+bluebird.promisifyAll(redis.Multi.prototype);
 
 mc.printStartupMessage(config)
 mc.setupVitals();
 
-bluebird.resolve(redis.createClient(config.redis))
+redis.createClientAsync(config.redis)
   .then((client) => new Meter(client, logger))
   .then((meter) => meter.startMonitor())
   .then(() => console.log('Power Meter Monitor started.'))
