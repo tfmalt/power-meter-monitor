@@ -23,7 +23,11 @@ mc.printStartupMessage(config)
 mc.setupVitals();
 
 bluebird.try(() => {
-  return redis.createClient(config.redis);
+  try {
+    return redis.createClient(config.redis);
+  } catch (error) {
+    throw error;
+  }
 })
   .then((client) => new Meter(client, logger))
   .then((meter) => meter.startMonitor())
