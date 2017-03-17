@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 /**
  * Startup script that bootstraps monitoring of my power meter talking
  * to a RaspberryPi, storing the data in a redis database.
@@ -8,10 +9,10 @@
  */
 
 const bluebird = require('bluebird');
-const redis    = require('redis');
-const Config   = require('./lib/ConfigParser');
-const Meter    = require('./lib/RaspberryMeter');
-const mc       = require('./lib/monitorController');
+const redis = require('redis');
+const Config = require('./lib/ConfigParser');
+const Meter = require('./lib/RaspberryMeter');
+const mc = require('./lib/monitorController');
 
 const config = new Config();
 const logger = mc.setupLogger(config);
@@ -22,28 +23,28 @@ bluebird.promisifyAll(redis.Multi.prototype);
 mc.printStartupMessage(config)
 mc.setupVitals();
 
-
-try {
-  const client = redis.createClient(config.redis);
-  bluebird.resolve(client)
-    .then((c) => new Meter(c, logger))
-    .then((meter) => meter.startMonitor())
-    .then(() => console.log('Power Meter Monitor started.'))
-    .then(() => (logger.info(
-        `Power meter monitoring v${config.version} started in master script`
-      )
-    ))
-    .catch(error => {
-      console.log('got error:', error.message);
-      logger.error('error.message');
-      process.exit(1);
-    });
-} catch (error) {
-  console.log('got error:', error.message);
-  console.log(error);
-  logger.error('error.message');
+redis.on('error', (err) => {
+  console.log('got error here!', err);
   process.exit(1);
-}
+});
+
+const client = redis.createClient(config.redis);
+bluebird.resolve(client)
+  .then((c) => new Meter(c, logger))
+  .then((meter) => meter.startMonitor())
+  .then(() => console.log('Power Meter Monitor started.'))
+  .then(() => (
+    logger.info(
+      `Power meter monitoring v${config.version} started in master script`
+    )
+  ))
+  .catch(error => {
+    console.log('got error:', error.message);
+    logger.error('error.message');
+    process.exit(1);
+  });
+
+
 
 /*
  * MIT LICENSE
