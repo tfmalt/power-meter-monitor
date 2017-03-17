@@ -21,13 +21,19 @@ bluebird.promisifyAll(redis);
 mc.printStartupMessage(config)
 mc.setupVitals();
 
-const client = redis.createClient(config.redis);
-const meter  = new Meter(client, logger);
-
-meter.startMonitor();
-
-console.log('Power Meter Monitor started.');
-logger.info('Power meter monitoring v%s started in master script', config.version);
+redis.createClientAsync(config.redis)
+  .then(client => new Meter(client, logger))
+  .then(meter => meter.startMonitor())
+  .then(() => console.log('Power Meter Monitor started.'))
+  .then(() => (logger.info(
+    `Power meter monitoring v${config.version} started in master script`
+    )
+  ))
+  .catch(error => {
+    console.log('got error:', error.message);
+    logger.error('error.message');
+    process.exit(1);
+  });
 
 /*
  * MIT LICENSE
