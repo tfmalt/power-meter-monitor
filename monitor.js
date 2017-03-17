@@ -23,7 +23,6 @@ bluebird.promisifyAll(redis.Multi.prototype);
 mc.printStartupMessage(config)
 mc.setupVitals();
 
-
 const client = redis.createClient(config.redis);
 
 client.on('error', (err) => {
