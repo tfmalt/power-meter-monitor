@@ -21,7 +21,7 @@ bluebird.promisifyAll(redis);
 mc.printStartupMessage(config)
 mc.setupVitals();
 
-redis.createClientAsync(config.redis)
+bluebird.resolve(redis.createClient(config.redis))
   .then((client) => new Meter(client, logger))
   .then((meter) => meter.startMonitor())
   .then(() => console.log('Power Meter Monitor started.'))
