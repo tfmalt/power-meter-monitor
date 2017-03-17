@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 /**
  * Startup script that bootstraps monitoring of my power meter talking
  * to a RaspberryPi, storing the data in a redis database.
@@ -8,25 +7,19 @@
  * @copyright 2013-2017 (c) Thomas Malt <thomas@malt.no>
  */
 
-const prom   = require('bluebird');
-const redis  = require('redis');
-const Config = require('./lib/ConfigParser');
-const Meter  = require('./lib/RaspberryMeter');
-const mc     = require('./lib/monitorController');
+const bluebird = require('bluebird');
+const redis    = require('redis');
+const Config   = require('./lib/ConfigParser');
+const Meter    = require('./lib/RaspberryMeter');
+const mc       = require('./lib/monitorController');
 
 const config = new Config();
 const logger = mc.setupLogger(config);
 
-prom.promisifyAll(redis);
-mc.setupVitals();
+bluebird.promisifyAll(redis);
 
-console.log('Starting power-meter-monitor version: ' + config.version);
-console.log('  Node version: ' + process.version);
-console.log('  Redis host: ' + config.redis.host + ':' + config.redis.port);
-console.log('  Power Meter Type:', config.meterType);
-logger.info('Starting power-meter-monitor version: ' + config.version);
-logger.info('Node version: ' + process.version);
-logger.info('Redis host: %s:%s', config.redis.host, config.redis.port);
+mc.printStartupMessage(config)
+mc.setupVitals();
 
 const client = redis.createClient(config.redis);
 const meter = new Meter(client);
