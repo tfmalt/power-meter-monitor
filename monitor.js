@@ -23,12 +23,13 @@ bluebird.promisifyAll(redis.Multi.prototype);
 mc.printStartupMessage(config)
 mc.setupVitals();
 
-redis.on('error', (err) => {
+
+const client = redis.createClient(config.redis);
+client.on('error', (err) => {
   console.log('got error here!', err);
   process.exit(1);
 });
 
-const client = redis.createClient(config.redis);
 bluebird.resolve(client)
   .then((c) => new Meter(c, logger))
   .then((meter) => meter.startMonitor())
