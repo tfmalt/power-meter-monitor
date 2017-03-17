@@ -26,7 +26,8 @@ mc.setupVitals();
 
 const client = redis.createClient(config.redis);
 client.on('error', (err) => {
-  console.log('got error here!', err);
+  console.log('got error:', err.message);
+  logger.error('error.message');
   process.exit(1);
 });
 
