@@ -28,7 +28,9 @@ const setupLogger = (cfg) => {
     case 'docker':
     case 'integration':
     case 'test':
-      console.log('Logging to: Console.');
+      console.log(
+        `Environment is ${process.env.NODE_ENV}, logging to: Console.`
+      );
       logger.add(logger.transports.Console, {
         colorize:  true,
         timestamp: true,
