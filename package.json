@@ -1,10 +1,10 @@
 {
   "name": "power-meter-monitor",
   "main": "lib/main.js",
-  "version": "2.5.10",
+  "version": "2.5.12",
   "author": "Thomas Malt",
   "license": "MIT",
-  "description": "Reading and logging an electrical power meter by connecting it to an arduino board",
+  "description": "Reading and logging an electrical power meter by connecting it to a raspberry pi",
   "repository": {
     "url": "https://github.com/tfmalt/power-meter-monitor"
   },
@@ -12,6 +12,7 @@
     "home automation",
     "DIY",
     "make",
+    "raspberry pi",
     "arduino"
   ],
   "private": false,
@@ -42,10 +43,9 @@
   },
   "scripts": {
     "test": "NODE_ENV=test nyc --reporter=text --reporter=lcov mocha **/*test.js",
-    "install": "./scripts/install.sh"
   },
   "bin": {
-    "power-meter-monitor": "./monitor.js",
-    "power-meter-updater": "./updater.js"
+    "power-meter-monitor": "./bin/monitor.js",
+    "power-meter-updater": "./bin/updater.js"
   }
 }
