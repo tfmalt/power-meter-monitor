@@ -12,6 +12,7 @@ const logger   = require('winston');
 const redis    = require('redis');
 const Config   = require('./lib/ConfigParser');
 const Updater  = require('./lib/UpdateMeter');
+const mc       = require('./lib/monitorController');
 
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
