@@ -9,10 +9,10 @@
  */
 
 const bluebird = require('bluebird');
-const redis = require('redis');
-const Config = require('./lib/ConfigParser');
-const Meter = require('./lib/RaspberryMeter');
-const mc = require('./lib/monitorController');
+const redis    = require('redis');
+const Config   = require('../lib/ConfigParser');
+const Meter    = require('../lib/RaspberryMeter');
+const mc       = require('../lib/monitorController');
 
 const config = new Config();
 const logger = mc.setupLogger(config);
