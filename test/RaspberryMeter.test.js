@@ -89,7 +89,7 @@ describe('RaspberryMeter', () => {
   describe('addPulse', () => {
     it('should add pulse without error', () => {
       expect(m.addPulse(0, 200)).to.be.undefined;
-    })
+    });
   });
 
   describe('handleSensorInterrupt', () => {
@@ -102,11 +102,17 @@ describe('RaspberryMeter', () => {
     });
 
     it('should complete without error', () => {
-      expect(m.handleSensorInterrupt(null, 1)).to.be.false;
+      m.addPulse(0, 200);
+      expect(m.handleSensorInterrupt(null, 0)).to.be.false;
     });
 
     it('should complete without error', () => {
+      m.addPulse(0);
       expect(m.handleSensorInterrupt(null, 1)).to.be.false;
+    });
+
+    it('should return true', () => {
+      expect(m.handleSensorInterrupt(null, 0)).to.be.false;
     });
   });
 
