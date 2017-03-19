@@ -5,97 +5,96 @@
  * @copyright 2015 (c) tm
  */
 
-var chai   = require('chai');
-var expect = chai.expect;
-var timer  = require('../lib/timeEmitter');
+const chai = require('chai');
+const expect = chai.expect;
+const TimeEmitter = require('../lib/TimeEmitter');
 
-describe('timeEmitter', function() {
-    "use strict";
-
-    describe('doEveryMinute', function() {
-        it('should complete without error', function() {
-            expect(timer.doEveryMinute()).to.be.undefined;
-        });
-
-        it('should trigger every five minutes event', function(done) {
-            timer.clock.setMinutes(5);
-            var test = function() {
-                expect(timer.isFiveMinutes()).to.be.true;
-                expect(timer.isHalfHour()).to.be.false;
-                done();
-            };
-            timer.on('every_five_minutes', test);
-            timer.doEveryMinute();
-            timer.removeListener('every_five_minutes', test);
-        });
-
-        it('should trigger half hour event', function(done) {
-            timer.clock.setMinutes(30);
-            var test = function() {
-                expect(timer.isFiveMinutes()).to.be.true;
-                expect(timer.isHalfHour()).to.be.true;
-                expect(timer.isHour()).to.be.false;
-                done();
-            };
-            timer.on('every_half_hour', test);
-            timer.doEveryMinute();
-            timer.removeListener('every_half_hour', test);
-        });
-
-        it('should trigger hour event', function(done) {
-            timer.clock.setMinutes(0);
-            var test = function() {
-                expect(timer.isHalfHour()).to.be.true;
-                expect(timer.isHour()).to.be.true;
-                done();
-            };
-            timer.on('every_hour', test);
-            timer.doEveryMinute();
-            timer.removeListener('every_hour', test);
-        });
-
-        it('should trigger six hour event', function(done) {
-            timer.clock.setHours(6);
-            timer.clock.setMinutes(0);
-            var test = function() {
-                expect(timer.isSixHours()).to.be.true;
-                done();
-            };
-            timer.on("every_six_hours", test);
-            timer.doEveryMinute();
-            timer.removeListener('every_six_hours', test);
-        });
+describe('TimeEmitter', () => {
+  const timer = new TimeEmitter();
+  describe('doEveryMinute', () => {
+    it('should complete without error', () => {
+      expect(timer.doEveryMinute()).to.be.undefined;
     });
 
-    describe('isYear', function() {
-        it('should return false', function() {
-            timer.clock.setDate(12);
-            expect(timer.isYear()).to.be.false;
-        });
-        it('should return true', function() {
-            timer.clock.setHours(0);
-            timer.clock.setMinutes(0);
-            timer.clock.setDate(1);
-            timer.clock.setMonth(0);
-
-            expect(timer.isYear()).to.be.true;
-        });
+    it('should trigger every five minutes event', (done) => {
+      timer.clock.setMinutes(5);
+      const test = () => {
+        expect(timer.isFiveMinutes()).to.be.true;
+        expect(timer.isHalfHour()).to.be.false;
+        done();
+      };
+      timer.on('every_five_minutes', test);
+      timer.doEveryMinute();
+      timer.removeListener('every_five_minutes', test);
     });
 
-    describe('isWeek', function() {
-        it('should return false', function() {
-            if(timer.clock.getDay === 0) {
-                timer.clock.setDate(timer.clock.getDate()+1);
-            }
-            expect(timer.isWeek()).to.be.false;
-        });
-
-        it('should return true', function() {
-            timer.clock.setMinutes(0);
-            timer.clock.setHours(0);
-            timer.clock.setDate(timer.clock.getDate() - timer.clock.getDay());
-            expect(timer.isWeek()).to.be.true;
-        });
+    it('should trigger half hour event', (done) => {
+      timer.clock.setMinutes(30);
+      const test = () => {
+        expect(timer.isFiveMinutes()).to.be.true;
+        expect(timer.isHalfHour()).to.be.true;
+        expect(timer.isHour()).to.be.false;
+        done();
+      };
+      timer.on('every_half_hour', test);
+      timer.doEveryMinute();
+      timer.removeListener('every_half_hour', test);
     });
 
+    it('should trigger hour event', (done) => {
+      timer.clock.setMinutes(0);
+      const test = () => {
+        expect(timer.isHalfHour()).to.be.true;
+        expect(timer.isHour()).to.be.true;
+        done();
+      };
+      timer.on('every_hour', test);
+      timer.doEveryMinute();
+      timer.removeListener('every_hour', test);
+    });
+
+    it('should trigger six hour event', (done) => {
+      timer.clock.setHours(6);
+      timer.clock.setMinutes(0);
+      const test = () => {
+        expect(timer.isSixHours()).to.be.true;
+        done();
+      };
+      timer.on('every_six_hours', test);
+      timer.doEveryMinute();
+      timer.removeListener('every_six_hours', test);
+    });
+  });
+
+  describe('isYear', () => {
+    it('should return false', () => {
+      timer.clock.setDate(12);
+      expect(timer.isYear()).to.be.false;
+    });
+    it('should return true', () => {
+      timer.clock.setHours(0);
+      timer.clock.setMinutes(0);
+      timer.clock.setDate(1);
+      timer.clock.setMonth(0);
+
+      expect(timer.isYear()).to.be.true;
+    });
+  });
+
+  describe('isWeek', () => {
+    const t = new TimeEmitter();
+    it('should return false', () => {
+      if (t.clock.getDay === 0) {
+        t.clock.setDate(t.clock.getDate() + 1);
+      }
+      expect(t.isWeek()).to.be.false;
+    });
+
+    it('should return true', () => {
+      t.clock.setMinutes(0);
+      t.clock.setHours(0);
+      t.clock.setDate(t.clock.getDate() - t.clock.getDay());
+      expect(t.isWeek()).to.be.true;
+    });
+  });
 });
