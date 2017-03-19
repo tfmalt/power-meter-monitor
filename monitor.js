@@ -17,19 +17,21 @@ const mc = require('./lib/monitorController');
 const config = new Config();
 const logger = mc.setupLogger(config);
 
+const errorExit = (error) => {
+  console.log('got error:', error.message);
+  logger.error(error.message);
+  process.exit(1);
+};
+
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 
-mc.printStartupMessage(config)
+mc.printStartupMessage(config);
 mc.setupVitals();
 
 const client = redis.createClient(config.redis);
 
-client.on('error', (err) => {
-  console.log('got error:', err.message);
-  logger.error('error.message');
-  process.exit(1);
-});
+client.on('error', errorExit);
 
 bluebird.resolve(client)
   .then((c) => new Meter(c, logger))
@@ -40,13 +42,7 @@ bluebird.resolve(client)
       `Power meter monitoring v${config.version} started in master script`
     )
   ))
-  .catch(error => {
-    console.log('got error:', error.message);
-    logger.error('error.message');
-    process.exit(1);
-  });
-
-
+  .catch(errorExit);
 
 /*
  * MIT LICENSE
