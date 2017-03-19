@@ -41,7 +41,7 @@
     "npm": ">= 3.10.x"
   },
   "scripts": {
-    "test": "NODE_ENV=test nyc mocha **/*test.js",
+    "test": "NODE_ENV=test nyc --reporter=text --reporter=lcov mocha **/*test.js",
     "install": "./scripts/install.sh"
   },
   "bin": {

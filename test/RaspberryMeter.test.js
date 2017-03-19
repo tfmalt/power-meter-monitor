@@ -24,7 +24,7 @@ try {
 }
 
 const mock_onoff = {
-  Gpio: function(number, direction, ok) {
+  Gpio: function (number, direction, ok) {
     // return 'mocked gpio';
     this.ok = ok;
     this.watch = () => true;
@@ -54,6 +54,10 @@ describe('RaspberryMeter', () => {
     expect(rpi).to.be.instanceOf(RaspberryMeter);
   });
 
+  it('have a Gpio object named led', () => {
+    expect(m.led).to.be.instanceof(mock_onoff.Gpio);
+  });
+
   describe('startMonitor', () => {
     it('should finish without error', () => {
       expect(m.startMonitor()).to.be.instanceof(RaspberryMeter);
@@ -71,6 +75,21 @@ describe('RaspberryMeter', () => {
     it('should return false', () => {
       return expect(m.verifyLimit()).to.eventually.equal(false);
     });
+
+    it('should return true when above limit', () => {
+      m.db = redis.createClient('verifyLimit');
+      m.limits.seconds = 60;
+      for (let i = 0; i < 100; i = i + 1) {
+        m.db.rpush('seconds', '{"timestamp": 0, "time": 0}');
+      }
+      return expect(m.verifyLimit()).to.eventually.equal(true);
+    });
+  });
+
+  describe('addPulse', () => {
+    it('should add pulse without error', () => {
+      expect(m.addPulse(0, 200)).to.be.undefined;
+    })
   });
 
   describe('handleSensorInterrupt', () => {
