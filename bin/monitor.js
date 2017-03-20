@@ -44,7 +44,10 @@ bluebird.resolve(client)
 
     meter.on('stored_second', (info) => {
       logger.info(
-        info.data.pulseCount, info.data.kWhs, info.data.watt, info.total
+        'count:', info.data.pulseCount,
+        'watt:', info.data.watt,
+        'kwhs:', info.data.kWhs,
+        'meter:', info.total
       );
     });
 
