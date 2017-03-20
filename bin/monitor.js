@@ -12,10 +12,10 @@ const bluebird = require('bluebird');
 const redis    = require('redis');
 const Config   = require('../lib/ConfigParser');
 const Meter    = require('../lib/RaspberryMeter');
-const mc       = require('../lib/monitorController');
+const utils       = require('../lib/monitorUtils');
 
 const config = new Config();
-const logger = mc.setupLogger(config);
+const logger = utils.setupLogger(config);
 
 const errorExit = (error) => {
   console.log('got error:', error.message);
@@ -26,8 +26,8 @@ const errorExit = (error) => {
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 
-mc.printStartupMessage(config);
-mc.setupVitals();
+utils.printStartupMessage(config);
+utils.setupVitals();
 
 const client = redis.createClient(config.redis);
 

@@ -1,7 +1,7 @@
 {
   "name": "power-meter-monitor",
   "main": "lib/main.js",
-  "version": "2.5.12",
+  "version": "3.0.0",
   "author": "Thomas Malt",
   "license": "MIT",
   "description": "Reading and logging an electrical power meter by connecting it to a raspberry pi",
@@ -45,7 +45,6 @@
     "test": "NODE_ENV=test nyc --reporter=text --reporter=lcov mocha **/*test.js"
   },
   "bin": {
-    "power-meter-monitor": "./bin/monitor.js",
-    "power-meter-updater": "./bin/updater.js"
+    "power-meter-monitor": "./bin/monitor.js"
   }
 }
