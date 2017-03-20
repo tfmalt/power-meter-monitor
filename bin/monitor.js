@@ -30,31 +30,39 @@ utils.printStartupMessage(config);
 utils.setupVitals();
 
 const client = redis.createClient(config.redis);
+const meter = new Meter(client);
 
 client.on('error', errorExit);
 
-bluebird.resolve(client)
-  .then((c) => new Meter(c))
-  .then(meter => {
-    meter.on('started', () => {
-      logger.info(
-        `Power meter monitoring v${config.version} started in master script`
-      );
-    });
+meter.on('started', () => {
+  logger.info(
+    `Power meter monitoring v${config.version} started in master script`
+  );
+});
 
-    meter.on('stored_second', (info) => {
-      logger.info(
-        'count:', info.data.pulseCount,
-        'watt:', info.data.watt,
-        'kwhs:', info.data.kWhs,
-        'meter:', info.total
-      );
-    });
+meter.on('stored_second', (info) => {
+  logger.info(
+    'count:', info.data.pulseCount,
+    ' watt:', info.data.watt,
+    ' kwhs:', info.data.kWhs,
+    ' meter:', info.total
+  );
+});
 
-    return meter;
-  })
-  .then((meter) => meter.startMonitor())
-  .catch(errorExit);
+meter.startMonitor();
+
+/* istanbul ignore next */
+process.on('SIGINT', () => {
+  console.log('RaspberryMeter: Dealing with SIGINT.');
+  console.log('  Unexporting sensor.');
+  meter.sensor.unexport();
+
+  console.log('  Unexporting led.');
+  meter.led.writeSync(0);
+  meter.led.unexport();
+
+  process.exit(1);
+});
 
 /*
  * MIT LICENSE
