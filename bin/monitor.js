@@ -12,7 +12,7 @@ const bluebird = require('bluebird');
 const redis    = require('redis');
 const Config   = require('../lib/ConfigParser');
 const Meter    = require('../lib/RaspberryMeter');
-const utils       = require('../lib/monitorUtils');
+const utils    = require('../lib/monitorUtils');
 
 const config = new Config();
 const logger = utils.setupLogger(config);
@@ -34,14 +34,23 @@ const client = redis.createClient(config.redis);
 client.on('error', errorExit);
 
 bluebird.resolve(client)
-  .then((c) => new Meter(c, logger))
+  .then((c) => new Meter(c))
+  .then(meter => {
+    meter.on('started', () => {
+      logger.info(
+        `Power meter monitoring v${config.version} started in master script`
+      );
+    });
+
+    meter.on('stored_second', (info) => {
+      logger.info(
+        info.data.pulseCount, info.data.kWhs, info.data.watt, info.total
+      );
+    });
+
+    return meter;
+  })
   .then((meter) => meter.startMonitor())
-  .then(() => console.log('Power Meter Monitor started.'))
-  .then(() => (
-    logger.info(
-      `Power meter monitoring v${config.version} started in master script`
-    )
-  ))
   .catch(errorExit);
 
 /*

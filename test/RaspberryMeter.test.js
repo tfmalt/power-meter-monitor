@@ -12,16 +12,9 @@ const bluebird = require('bluebird');
 const expect = chai.expect;
 const mockery = require('mockery');
 const redis = require('fakeredis');
-const logger = require('winston');
 
 chai.use(promise);
 bluebird.promisifyAll(redis);
-
-try {
-  logger.remove(logger.transports.Console);
-} catch (e) {
-  // ignore
-}
 
 const mock_onoff = {
   Gpio: function (number, direction, ok) {
@@ -45,7 +38,7 @@ describe('RaspberryMeter', () => {
   });
 
   beforeEach((done) => {
-    m = new RaspberryMeter(redis.createClient(), logger);
+    m = new RaspberryMeter(redis.createClient());
     done();
   });
 
@@ -73,16 +66,16 @@ describe('RaspberryMeter', () => {
 
   describe('verifyLimit', () => {
     it('should return false', () => {
-      return expect(m.verifyLimit()).to.eventually.equal(false);
+      return expect(m.verifyLimit()).to.eventually.equal(0);
     });
 
     it('should return true when above limit', () => {
       m.db = redis.createClient('verifyLimit');
       m.limits.seconds = 60;
       for (let i = 0; i < 100; i = i + 1) {
-        m.db.rpush('seconds', '{"timestamp": 0, "time": 0}');
+        m.db.rpush('seconds', '{"timestamp": 0, "time": 0, "kWhs": 0.009}');
       }
-      return expect(m.verifyLimit()).to.eventually.equal(true);
+      return expect(m.verifyLimit()).to.eventually.equal(60);
     });
   });
 
