@@ -44,7 +44,7 @@ meter.on('stored_data', (info) => {
   logger.info(
     'count:', info.data.pulseCount,
     ' watt:', info.data.watt,
-    ' kwhs:', info.data.kWhs,
+    ' kwh:', info.data.kwh,
     ' meter:', info.total
   );
 });
