@@ -59,7 +59,7 @@ describe('RaspberryMeter', () => {
 
   describe('doEverySecond', () => {
     it('should run timeout as expected', (done) => {
-      m.doEverySecond(m);
+      m.storeData();
       done();
     });
   });

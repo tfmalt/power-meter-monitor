@@ -40,7 +40,7 @@ meter.on('started', () => {
   );
 });
 
-meter.on('stored_second', (info) => {
+meter.on('stored_data', (info) => {
   logger.info(
     'count:', info.data.pulseCount,
     ' watt:', info.data.watt,
