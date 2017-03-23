@@ -124,7 +124,7 @@ describe('RaspberryMeter', () => {
     });
 
     it('should throw error when called with incorrect data', () => {
-      expect(m.updateMeterTotal.bind(m, {"foo": 1})).to.throw(TypeError);
+      expect(m.updateMeterTotal.bind(m, {foo: 1})).to.throw(TypeError);
     });
   });
 
