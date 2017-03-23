@@ -43,9 +43,9 @@ meter.on('started', () => {
 meter.on('stored_data', (info) => {
   logger.info(
     'count:', info.data.pulseCount,
-    ' watt:', info.data.watt,
-    ' kwh:', info.data.kwh,
-    ' meter:', info.total
+    ' watt:', parseFloat(info.data.watt).toFixed(4),
+    ' kwh:', parseFloat(info.data.kwh).toFixed(4),
+    ' meter:', parseFloat(info.total).toFixed(4)
   );
 });
 
