@@ -1,7 +1,7 @@
 {
   "name": "power-meter-monitor",
   "main": "lib/main.js",
-  "version": "3.1.4",
+  "version": "3.1.5",
   "author": "Thomas Malt",
   "license": "MIT",
   "description": "Reading and logging an electrical power meter by connecting it to a raspberry pi",
@@ -19,7 +19,7 @@
   "dependencies": {
     "args": "^2.3.0",
     "bluebird": "^3.5.0",
-    "cron-emitter": "^1.0.3",
+    "cron-emitter": "^1.2.2",
     "onoff": "^1.1.2",
     "redis": "^2.7.0",
     "vitalsigns": "^0.4.3",

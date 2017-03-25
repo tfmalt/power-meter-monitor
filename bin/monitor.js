@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 /**
  * Startup script that bootstraps monitoring of my power meter talking
  * to a RaspberryPi, storing the data in a redis database.
@@ -47,6 +46,10 @@ meter.on('stored_data', (info) => {
     ' kwh:', parseFloat(info.data.kwh).toFixed(4),
     ' meter:', parseFloat(info.total).toFixed(4)
   );
+});
+
+meter.on('reset_counter', (info) => {
+  logger.info('reset counter: ', info);
 });
 
 meter.startMonitor();
