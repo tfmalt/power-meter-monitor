@@ -49,8 +49,8 @@ meter.on('stored_data', (info) => {
 });
 
 meter.on('reset_counter', (info) => {
-  const [zero, ones] = info.reduce((a, b) => a[b.value] + b.length, [0, 0]);
-  logger.info('reset counter: ', zero / info.length, ones / info.length);
+  const [zero, ones] = info.pulses.reduce((a, b) => a[b.value] + b.length, [0, 0]);
+  logger.info('reset counter: ', zero / info.pulses.length, ones / info.pulses.length);
 });
 
 meter.startMonitor();
