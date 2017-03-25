@@ -56,7 +56,7 @@ meter.on('reset_counter', (info) => {
   const zero = average(info.pulses, 0);
   const ones = average(info.pulses, 1);
 
-  logger.info('reset counter: ', zero, ones);
+  logger.info('reset counter: ', zero, ones, info);
 });
 
 meter.startMonitor();
