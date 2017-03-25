@@ -55,7 +55,7 @@ meter.on('reset_counter', (info) => {
 
   const zero = average(info.pulses, 0);
   const ones = average(info.pulses, 1);
-  const calc = 10000 / (zero + ones);
+  const calc = 10000 / ones;
   logger.info('reset counter: ', zero, ones, calc);
 });
 
