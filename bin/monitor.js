@@ -48,17 +48,6 @@ meter.on('stored_data', (info) => {
   );
 });
 
-meter.on('reset_counter', (info) => {
-  const average = (list, key) => list.reduce(
-    (a, b) => (b.value === key ? a + b.length : a), 0
-  ) / (list.length / 2);
-
-  const zero = average(info.pulses, 0);
-  const ones = average(info.pulses, 1);
-  const calc = 10000 / ones;
-  logger.info('reset counter: ', zero, ones, calc);
-});
-
 meter.startMonitor();
 
 /* istanbul ignore next */
