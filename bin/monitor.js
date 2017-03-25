@@ -49,8 +49,14 @@ meter.on('stored_data', (info) => {
 });
 
 meter.on('reset_counter', (info) => {
-  const [zero, ones] = info.pulses.reduce((a, b) => a[b.value] + b.length, [0, 0]);
-  logger.info('reset counter: ', zero / info.pulses.length, ones / info.pulses.length);
+  const average = (list, key) => list.reduce(
+    (a, b) => (b.value === key ? a + b.length : a), 0
+  ) / list.length;
+
+  const zero = average(info.pulses, 0);
+  const ones = average(info.pulses, 1);
+
+  logger.info('reset counter: ', zero, ones);
 });
 
 meter.startMonitor();
