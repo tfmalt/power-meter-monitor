@@ -17,7 +17,7 @@
   ],
   "private": false,
   "dependencies": {
-    "args": "^2.3.0",
+    "args": "^2.4.0",
     "bluebird": "^3.5.0",
     "cron-emitter": "^1.2.2",
     "onoff": "^1.1.2",
