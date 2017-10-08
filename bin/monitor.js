@@ -35,7 +35,7 @@ client.on('error', errorExit);
 
 meter.on('started', () => {
   logger.info(`Power meter monitoring v${config.version} started in master script`);
-  logger.info(`Data saving interval=${config.interval}, imps per kWh=${config.impsPerKwh}`);
+  logger.info(`Data saving interval is ${config.interval}s, ${config.impsPerKwh} imps per second`);
 });
 
 meter.on('stored_data', (info) => {
