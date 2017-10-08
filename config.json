@@ -5,5 +5,7 @@
     "port": 6379,
     "password": ""
   },
-  "meterType": "rpi"
+  "meterType": "rpi",
+  "interval": 30,
+  "impsPerKwh": 1000
 }
