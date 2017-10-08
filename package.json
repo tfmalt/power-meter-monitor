@@ -38,8 +38,8 @@
     "sinon": "^4.0.1"
   },
   "engines": {
-    "node": ">= 8.6.x",
-    "npm": ">= 5.3.x"
+    "node": ">= 6.11.x",
+    "npm": ">= 3.10.x"
   },
   "scripts": {
     "test": "NODE_ENV=test nyc --reporter=text --reporter=lcov mocha **/*test.js"
