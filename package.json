@@ -17,29 +17,29 @@
   ],
   "private": false,
   "dependencies": {
-    "args": "^2.4.0",
+    "args": "^3.0.4",
     "bluebird": "^3.5.0",
     "cron-emitter": "^1.2.2",
-    "onoff": "^1.1.2",
-    "redis": "^2.7.0",
+    "onoff": "^1.1.7",
+    "redis": "^2.8.0",
     "vitalsigns": "^0.4.3",
-    "winston": "^2.3.1"
+    "winston": "^2.4.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "chai-as-promised": "^6.0.0",
+    "chai": "^4.1.0",
+    "chai-as-promised": "^7.1.0",
     "codeclimate-test-reporter": "^0.4.1",
-    "eslint": "^3.18.0",
-    "eslint-plugin-mocha": "^4.8.0",
+    "eslint": "^4.8.0",
+    "eslint-plugin-mocha": "^4.11.0",
     "fakeredis": "^2.0.0",
-    "mocha": "^3.2.0",
-    "mockery": "^2.0.0",
-    "nyc": "^10.1.2",
-    "sinon": "^1.17.7"
+    "mocha": "^4.0.0",
+    "mockery": "^2.1.0",
+    "nyc": "^11.2.1",
+    "sinon": "^4.0.1"
   },
   "engines": {
-    "node": ">= 6.10.x",
-    "npm": ">= 3.10.x"
+    "node": ">= 8.6.x",
+    "npm": ">= 5.3.x"
   },
   "scripts": {
     "test": "NODE_ENV=test nyc --reporter=text --reporter=lcov mocha **/*test.js"
