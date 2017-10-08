@@ -29,14 +29,13 @@ utils.printStartupMessage(config);
 utils.setupVitals();
 
 const client = redis.createClient(config.redis);
-const meter = new Meter(client);
+const meter = new Meter(client, config);
 
 client.on('error', errorExit);
 
 meter.on('started', () => {
-  logger.info(
-    `Power meter monitoring v${config.version} started in master script`
-  );
+  logger.info(`Power meter monitoring v${config.version} started in master script`);
+  logger.info(`Data saving interval=${config.interval}, imps per kWh=${config.impsPerKwh}`);
 });
 
 meter.on('stored_data', (info) => {
