@@ -1,7 +1,7 @@
 {
   "name": "power-meter-monitor",
   "main": "lib/main.js",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "author": "Thomas Malt",
   "license": "MIT",
   "description": "Reading and logging an electrical power meter by connecting it to a raspberry pi",
